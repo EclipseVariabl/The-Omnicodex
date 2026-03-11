@@ -1,0 +1,3963 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CHARACTER FORGE — Multi-System RPG Character Creator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;600;700&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-deep: #0a0a0f;
+    --bg-mid: #0f0f1a;
+    --bg-card: #13131f;
+    --bg-card2: #1a1a2e;
+    --border: #2a2a4a;
+    --border-bright: #4a4a8a;
+    --accent: #c8a84b;
+    --accent2: #e8c870;
+    --accent-dim: #7a6420;
+    --text-primary: #e8e0d0;
+    --text-secondary: #9090b0;
+    --text-dim: #505070;
+    --red: #c0392b;
+    --red-bright: #e74c3c;
+    --green: #27ae60;
+    --green-bright: #2ecc71;
+    --blue: #2980b9;
+    --blue-bright: #3498db;
+    --purple: #8e44ad;
+    --purple-bright: #9b59b6;
+    --teal: #16a085;
+    --teal-bright: #1abc9c;
+    --orange: #d35400;
+    --orange-bright: #e67e22;
+    --glow: 0 0 20px rgba(200, 168, 75, 0.3);
+    --glow-strong: 0 0 40px rgba(200, 168, 75, 0.5);
+    --shadow-deep: 0 8px 32px rgba(0,0,0,0.8);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { font-size: 16px; scroll-behavior: smooth; }
+  body {
+    background: var(--bg-deep);
+    color: var(--text-primary);
+    font-family: 'Crimson Pro', Georgia, serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+    background-image:
+      radial-gradient(ellipse at 20% 20%, rgba(200,168,75,0.04) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 80%, rgba(74,74,138,0.06) 0%, transparent 50%),
+      url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.01'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  }
+
+  /* ===== SCROLLBAR ===== */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg-deep); }
+  ::-webkit-scrollbar-thumb { background: var(--accent-dim); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
+  /* ===== LAYOUT ===== */
+  #app { display: flex; flex-direction: column; min-height: 100vh; }
+
+  /* ===== HEADER ===== */
+  header {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(10,10,15,0.95);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+    display: flex; align-items: center; justify-content: space-between;
+    height: 64px;
+    box-shadow: 0 2px 20px rgba(0,0,0,0.5);
+  }
+  .logo {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--accent);
+    text-shadow: var(--glow);
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    user-select: none;
+  }
+  .logo span { color: var(--text-secondary); font-weight: 400; font-size: 0.7rem; display: block; letter-spacing: 0.2em; margin-top: -2px; }
+  .header-nav { display: flex; gap: 0.5rem; align-items: center; }
+  .nav-btn {
+    background: none; border: 1px solid var(--border);
+    color: var(--text-secondary); font-family: 'Share Tech Mono', monospace;
+    font-size: 0.75rem; padding: 0.4rem 0.9rem; border-radius: 4px;
+    cursor: pointer; transition: all 0.2s; letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .nav-btn:hover, .nav-btn.active {
+    border-color: var(--accent); color: var(--accent);
+    background: rgba(200,168,75,0.08);
+    box-shadow: 0 0 12px rgba(200,168,75,0.2);
+  }
+  .nav-btn.danger:hover { border-color: var(--red-bright); color: var(--red-bright); background: rgba(192,57,43,0.08); }
+
+  /* ===== MAIN CONTENT ===== */
+  main { flex: 1; display: flex; }
+  .sidebar {
+    width: 280px; min-width: 280px;
+    background: var(--bg-mid);
+    border-right: 1px solid var(--border);
+    display: flex; flex-direction: column;
+    overflow-y: auto; overflow-x: hidden;
+  }
+  .content-area { flex: 1; overflow-y: auto; padding: 2rem; }
+
+  /* ===== SIDEBAR ===== */
+  .sidebar-section { padding: 1rem; border-bottom: 1px solid var(--border); }
+  .sidebar-title {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem; letter-spacing: 0.2em;
+    color: var(--text-dim); text-transform: uppercase;
+    margin-bottom: 0.75rem; padding-bottom: 0.4rem;
+    border-bottom: 1px solid rgba(200,168,75,0.2);
+  }
+  .game-list { display: flex; flex-direction: column; gap: 2px; }
+  .game-item {
+    display: flex; align-items: center; gap: 0.6rem;
+    padding: 0.5rem 0.6rem; border-radius: 4px;
+    cursor: pointer; transition: all 0.15s;
+    font-size: 0.9rem;
+  }
+  .game-item:hover { background: rgba(255,255,255,0.04); }
+  .game-item.active { background: rgba(200,168,75,0.1); }
+  .game-item.active .game-name { color: var(--accent); }
+  .game-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    flex-shrink: 0; box-shadow: 0 0 6px currentColor;
+  }
+  .game-name { font-size: 0.85rem; color: var(--text-secondary); flex: 1; }
+  .game-count {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.7rem; color: var(--text-dim);
+    background: var(--bg-card2); padding: 1px 6px; border-radius: 3px;
+  }
+  .char-list { display: flex; flex-direction: column; gap: 3px; }
+  .char-item {
+    display: flex; align-items: center; gap: 0.5rem;
+    padding: 0.5rem 0.6rem; border-radius: 4px;
+    cursor: pointer; transition: all 0.15s;
+    border: 1px solid transparent;
+  }
+  .char-item:hover { background: rgba(255,255,255,0.03); border-color: var(--border); }
+  .char-item.active { background: rgba(200,168,75,0.08); border-color: var(--accent-dim); }
+  .char-avatar {
+    width: 32px; height: 32px; border-radius: 4px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem; background: var(--bg-card2); flex-shrink: 0;
+  }
+  .char-info { flex: 1; min-width: 0; }
+  .char-name { font-size: 0.85rem; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .char-meta { font-size: 0.72rem; color: var(--text-dim); font-family: 'Share Tech Mono', monospace; }
+  .btn-new {
+    width: 100%; padding: 0.6rem;
+    background: rgba(200,168,75,0.1); border: 1px dashed var(--accent-dim);
+    color: var(--accent); font-family: 'Share Tech Mono', monospace;
+    font-size: 0.75rem; letter-spacing: 0.1em; text-transform: uppercase;
+    border-radius: 4px; cursor: pointer; transition: all 0.2s;
+    margin-top: 0.5rem;
+  }
+  .btn-new:hover { background: rgba(200,168,75,0.18); border-color: var(--accent); box-shadow: var(--glow); }
+
+  /* ===== WELCOME SCREEN ===== */
+  .welcome {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    min-height: 80vh; text-align: center; padding: 2rem;
+  }
+  .welcome-rune {
+    font-size: 5rem; margin-bottom: 1.5rem;
+    animation: pulse-glow 3s ease-in-out infinite;
+  }
+  @keyframes pulse-glow {
+    0%, 100% { filter: drop-shadow(0 0 8px rgba(200,168,75,0.4)); }
+    50% { filter: drop-shadow(0 0 24px rgba(200,168,75,0.8)); }
+  }
+  .welcome h1 {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 2.5rem; color: var(--accent);
+    text-shadow: var(--glow-strong); margin-bottom: 0.5rem;
+  }
+  .welcome p { color: var(--text-secondary); font-size: 1.1rem; max-width: 500px; line-height: 1.7; margin-bottom: 2rem; }
+  .welcome-stats { display: flex; gap: 2rem; margin-bottom: 2.5rem; }
+  .welcome-stat { text-align: center; }
+  .welcome-stat-num { font-family: 'Cinzel', serif; font-size: 2rem; color: var(--accent); }
+  .welcome-stat-label { font-size: 0.75rem; color: var(--text-dim); font-family: 'Share Tech Mono', monospace; text-transform: uppercase; letter-spacing: 0.1em; }
+  .game-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 1rem; max-width: 700px; width: 100%; }
+  .game-card {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: 8px; padding: 1.2rem; text-align: center;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .game-card:hover { border-color: var(--border-bright); background: var(--bg-card2); transform: translateY(-2px); box-shadow: var(--shadow-deep); }
+  .game-card-icon { font-size: 1.8rem; margin-bottom: 0.5rem; }
+  .game-card-name { font-size: 0.75rem; color: var(--text-secondary); font-family: 'Share Tech Mono', monospace; }
+
+  /* ===== GAME SELECTION SCREEN ===== */
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  /* ===== CHARACTER SHEET ===== */
+  .sheet-header {
+    display: flex; align-items: flex-start; gap: 1.5rem;
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .sheet-avatar {
+    width: 80px; height: 80px; border-radius: 8px;
+    background: var(--bg-card2); border: 2px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 2.5rem; flex-shrink: 0; cursor: pointer;
+    transition: all 0.2s;
+  }
+  .sheet-avatar:hover { border-color: var(--accent); box-shadow: var(--glow); }
+  .sheet-title-area { flex: 1; }
+  .sheet-game-tag {
+    font-family: 'Share Tech Mono', monospace; font-size: 0.65rem;
+    letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--text-dim); margin-bottom: 0.3rem;
+    display: flex; align-items: center; gap: 0.5rem;
+  }
+  .sheet-game-tag::before {
+    content: ''; display: inline-block;
+    width: 6px; height: 6px; border-radius: 50%;
+    background: currentColor;
+  }
+  .sheet-char-name {
+    font-family: 'Cinzel', serif; font-size: 2rem;
+    color: var(--text-primary); line-height: 1;
+    margin-bottom: 0.3rem;
+  }
+  .sheet-char-subtitle { color: var(--text-secondary); font-size: 1rem; font-style: italic; }
+  .sheet-actions { display: flex; gap: 0.5rem; margin-left: auto; }
+  .btn-sheet {
+    padding: 0.4rem 0.8rem; border-radius: 4px; cursor: pointer;
+    font-family: 'Share Tech Mono', monospace; font-size: 0.7rem;
+    letter-spacing: 0.1em; text-transform: uppercase; transition: all 0.2s;
+    border: 1px solid var(--border); background: none; color: var(--text-secondary);
+  }
+  .btn-sheet:hover { border-color: var(--border-bright); color: var(--text-primary); }
+  .btn-sheet.primary { border-color: var(--accent-dim); color: var(--accent); background: rgba(200,168,75,0.08); }
+  .btn-sheet.primary:hover { background: rgba(200,168,75,0.15); border-color: var(--accent); }
+  .btn-sheet.danger { border-color: rgba(192,57,43,0.4); color: var(--red); }
+  .btn-sheet.danger:hover { background: rgba(192,57,43,0.1); border-color: var(--red-bright); }
+
+  /* ===== TABS ===== */
+  .tabs { display: flex; gap: 0; border-bottom: 1px solid var(--border); margin-bottom: 1.5rem; overflow-x: auto; }
+  .tab-btn {
+    padding: 0.6rem 1.2rem; border: none; background: none;
+    color: var(--text-dim); font-family: 'Share Tech Mono', monospace;
+    font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase;
+    cursor: pointer; transition: all 0.2s; white-space: nowrap;
+    border-bottom: 2px solid transparent; margin-bottom: -1px;
+  }
+  .tab-btn:hover { color: var(--text-secondary); }
+  .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* ===== FORM ELEMENTS ===== */
+  .form-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+  .form-grid-2 { grid-template-columns: 1fr 1fr; }
+  .form-grid-3 { grid-template-columns: 1fr 1fr 1fr; }
+  .form-group { display: flex; flex-direction: column; gap: 0.3rem; }
+  .form-group.full { grid-column: 1 / -1; }
+  label {
+    font-family: 'Share Tech Mono', monospace; font-size: 0.65rem;
+    letter-spacing: 0.15em; color: var(--text-dim); text-transform: uppercase;
+  }
+  input[type="text"], input[type="number"], select, textarea {
+    background: var(--bg-card2); border: 1px solid var(--border);
+    color: var(--text-primary); font-family: 'Crimson Pro', serif;
+    font-size: 0.95rem; padding: 0.5rem 0.7rem; border-radius: 4px;
+    transition: all 0.2s; outline: none; width: 100%;
+  }
+  input:focus, select:focus, textarea:focus {
+    border-color: var(--accent-dim); box-shadow: 0 0 0 2px rgba(200,168,75,0.1);
+  }
+  select option { background: var(--bg-card2); }
+  textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
+  input[type="number"] { -moz-appearance: textfield; }
+
+  /* ===== SECTION CARDS ===== */
+  .section-card {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: 8px; padding: 1.2rem; margin-bottom: 1rem;
+  }
+  .section-card-title {
+    font-family: 'Cinzel', serif; font-size: 0.85rem;
+    color: var(--accent); letter-spacing: 0.1em; text-transform: uppercase;
+    margin-bottom: 1rem; padding-bottom: 0.5rem;
+    border-bottom: 1px solid rgba(200,168,75,0.2);
+    display: flex; align-items: center; gap: 0.5rem;
+  }
+  .section-card-title::before { content: '◈'; font-size: 0.7rem; }
+
+  /* ===== STAT BOXES ===== */
+  .stat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 0.8rem; }
+  .stat-box {
+    background: var(--bg-card2); border: 1px solid var(--border);
+    border-radius: 6px; padding: 0.7rem 0.5rem; text-align: center;
+    transition: all 0.2s;
+  }
+  .stat-box:hover { border-color: var(--border-bright); }
+  .stat-label { font-family: 'Share Tech Mono', monospace; font-size: 0.6rem; color: var(--text-dim); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 0.3rem; }
+  .stat-value { font-family: 'Cinzel', serif; font-size: 1.6rem; color: var(--accent); line-height: 1; }
+  .stat-mod { font-family: 'Share Tech Mono', monospace; font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.2rem; }
+  .stat-input { width: 100%; background: none; border: none; text-align: center; font-family: 'Cinzel', serif; font-size: 1.6rem; color: var(--accent); outline: none; }
+
+  /* ===== TRAIT PILLS ===== */
+  .trait-list { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+  .trait-pill {
+    background: var(--bg-card2); border: 1px solid var(--border);
+    border-radius: 20px; padding: 0.25rem 0.8rem;
+    font-size: 0.82rem; color: var(--text-secondary);
+    display: flex; align-items: center; gap: 0.4rem; cursor: default;
+  }
+  .trait-pill .remove-btn {
+    cursor: pointer; color: var(--text-dim); font-size: 0.7rem;
+    transition: color 0.15s; line-height: 1;
+  }
+  .trait-pill .remove-btn:hover { color: var(--red-bright); }
+  .add-trait-row { display: flex; gap: 0.5rem; margin-top: 0.5rem; }
+  .add-trait-input { flex: 1; }
+  .btn-add {
+    padding: 0.5rem 0.9rem; background: rgba(200,168,75,0.1);
+    border: 1px solid var(--accent-dim); color: var(--accent);
+    border-radius: 4px; cursor: pointer; font-family: 'Share Tech Mono', monospace;
+    font-size: 0.7rem; transition: all 0.2s; white-space: nowrap;
+  }
+  .btn-add:hover { background: rgba(200,168,75,0.2); border-color: var(--accent); }
+
+  /* ===== RESOURCE BARS ===== */
+  .resource-row { display: flex; flex-direction: column; gap: 0.3rem; margin-bottom: 0.8rem; }
+  .resource-label-row { display: flex; justify-content: space-between; align-items: center; }
+  .resource-label { font-family: 'Share Tech Mono', monospace; font-size: 0.65rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.1em; }
+  .resource-val { font-family: 'Share Tech Mono', monospace; font-size: 0.8rem; color: var(--text-secondary); }
+  .resource-bar-outer { height: 8px; background: var(--bg-card2); border-radius: 4px; overflow: hidden; position: relative; cursor: pointer; }
+  .resource-bar-inner { height: 100%; border-radius: 4px; transition: width 0.3s; }
+  .resource-inputs { display: flex; gap: 0.5rem; align-items: center; }
+  .resource-inputs input { width: 60px; text-align: center; }
+
+  /* ===== CHECKBOX TRACK ===== */
+  .checkbox-track { display: flex; gap: 4px; flex-wrap: wrap; }
+  .track-box {
+    width: 18px; height: 18px; border: 1px solid var(--border);
+    border-radius: 3px; cursor: pointer; transition: all 0.15s;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.6rem; color: transparent;
+  }
+  .track-box:hover { border-color: var(--border-bright); }
+  .track-box.filled { background: var(--accent); border-color: var(--accent); color: var(--bg-deep); }
+  .track-box.damaged { background: var(--red); border-color: var(--red-bright); color: white; }
+
+  /* ===== AI ASSISTANT ===== */
+  .ai-panel {
+    position: fixed; right: 0; top: 64px; bottom: 0;
+    width: 380px; background: var(--bg-mid);
+    border-left: 1px solid var(--border);
+    display: flex; flex-direction: column;
+    transform: translateX(100%); transition: transform 0.3s ease;
+    z-index: 50;
+  }
+  .ai-panel.open { transform: translateX(0); }
+  .ai-panel-header {
+    padding: 1rem 1.2rem; border-bottom: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center;
+    background: var(--bg-card);
+  }
+  .ai-panel-title {
+    font-family: 'Cinzel', serif; font-size: 0.9rem; color: var(--accent);
+    display: flex; align-items: center; gap: 0.5rem;
+  }
+  .ai-status { width: 8px; height: 8px; border-radius: 50%; background: var(--green); box-shadow: 0 0 8px var(--green); animation: blink 2s infinite; }
+  @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+  .ai-close { background: none; border: none; color: var(--text-dim); cursor: pointer; font-size: 1.2rem; padding: 0.2rem; }
+  .ai-close:hover { color: var(--text-primary); }
+  .ai-messages { flex: 1; overflow-y: auto; padding: 1rem; display: flex; flex-direction: column; gap: 0.8rem; }
+  .ai-msg {
+    padding: 0.7rem 0.9rem; border-radius: 8px; font-size: 0.88rem; line-height: 1.6;
+    max-width: 95%;
+  }
+  .ai-msg.system {
+    background: rgba(200,168,75,0.08); border: 1px solid rgba(200,168,75,0.2);
+    color: var(--text-secondary); align-self: flex-start; width: 100%;
+  }
+  .ai-msg.user {
+    background: var(--bg-card2); border: 1px solid var(--border);
+    color: var(--text-primary); align-self: flex-end;
+  }
+  .ai-msg.assistant {
+    background: rgba(74,74,138,0.15); border: 1px solid rgba(74,74,138,0.3);
+    color: var(--text-primary); align-self: flex-start; width: 100%;
+  }
+  .ai-msg.loading { opacity: 0.6; }
+  .ai-msg-label { font-family: 'Share Tech Mono', monospace; font-size: 0.6rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.3rem; }
+  .ai-input-area { padding: 1rem; border-top: 1px solid var(--border); }
+  .ai-input-row { display: flex; gap: 0.5rem; }
+  .ai-input {
+    flex: 1; background: var(--bg-card2); border: 1px solid var(--border);
+    color: var(--text-primary); font-family: 'Crimson Pro', serif;
+    font-size: 0.9rem; padding: 0.5rem 0.7rem; border-radius: 6px;
+    outline: none; resize: none; transition: border-color 0.2s;
+    height: 40px; max-height: 120px;
+  }
+  .ai-input:focus { border-color: var(--accent-dim); }
+  .ai-send {
+    padding: 0 1rem; background: rgba(200,168,75,0.15);
+    border: 1px solid var(--accent-dim); color: var(--accent);
+    border-radius: 6px; cursor: pointer; font-family: 'Share Tech Mono', monospace;
+    font-size: 0.7rem; transition: all 0.2s; white-space: nowrap;
+  }
+  .ai-send:hover { background: rgba(200,168,75,0.25); border-color: var(--accent); }
+  .ai-send:disabled { opacity: 0.4; cursor: not-allowed; }
+  .ai-quick-btns { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 0.6rem; }
+  .ai-quick-btn {
+    font-size: 0.68rem; padding: 0.25rem 0.6rem;
+    background: var(--bg-card); border: 1px solid var(--border);
+    color: var(--text-dim); border-radius: 20px; cursor: pointer;
+    transition: all 0.15s; font-family: 'Share Tech Mono', monospace;
+  }
+  .ai-quick-btn:hover { border-color: var(--accent-dim); color: var(--accent); }
+
+  /* ===== FLOATING AI BUTTON ===== */
+  .ai-fab {
+    position: fixed; right: 1.5rem; bottom: 1.5rem; z-index: 60;
+    width: 54px; height: 54px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--accent-dim));
+    border: none; cursor: pointer; color: var(--bg-deep);
+    font-size: 1.4rem; display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 4px 20px rgba(200,168,75,0.5);
+    transition: all 0.2s;
+  }
+  .ai-fab:hover { transform: scale(1.1); box-shadow: 0 6px 28px rgba(200,168,75,0.7); }
+  .ai-fab.panel-open { right: calc(380px + 1.5rem); }
+
+  /* ===== MODAL ===== */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(4px); z-index: 200;
+    display: none; align-items: center; justify-content: center;
+    padding: 1rem;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--bg-mid); border: 1px solid var(--border);
+    border-radius: 12px; padding: 2rem; max-width: 600px; width: 100%;
+    max-height: 90vh; overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+    animation: modal-in 0.25s ease;
+  }
+  @keyframes modal-in {
+    from { opacity: 0; transform: scale(0.95) translateY(-10px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+  }
+  .modal-title {
+    font-family: 'Cinzel Decorative', serif; font-size: 1.2rem;
+    color: var(--accent); margin-bottom: 1.5rem;
+    text-shadow: var(--glow);
+  }
+  .modal-actions { display: flex; gap: 0.75rem; justify-content: flex-end; margin-top: 1.5rem; }
+  .btn-primary {
+    padding: 0.6rem 1.5rem; background: rgba(200,168,75,0.15);
+    border: 1px solid var(--accent); color: var(--accent);
+    border-radius: 6px; cursor: pointer; font-family: 'Share Tech Mono', monospace;
+    font-size: 0.75rem; letter-spacing: 0.1em; text-transform: uppercase; transition: all 0.2s;
+  }
+  .btn-primary:hover { background: rgba(200,168,75,0.25); box-shadow: var(--glow); }
+  .btn-secondary {
+    padding: 0.6rem 1.5rem; background: none;
+    border: 1px solid var(--border); color: var(--text-secondary);
+    border-radius: 6px; cursor: pointer; font-family: 'Share Tech Mono', monospace;
+    font-size: 0.75rem; letter-spacing: 0.1em; text-transform: uppercase; transition: all 0.2s;
+  }
+  .btn-secondary:hover { border-color: var(--border-bright); color: var(--text-primary); }
+
+  /* ===== GAME-SPECIFIC COLORS ===== */
+  .game-dnd .sheet-game-tag { color: #e74c3c; }
+  .game-dnd .section-card-title, .game-dnd .stat-value { color: #e74c3c; }
+  .game-dnd .stat-box:hover { border-color: #e74c3c; }
+  .game-coc .sheet-game-tag { color: #8e44ad; }
+  .game-coc .section-card-title, .game-coc .stat-value { color: #8e44ad; }
+  .game-dg .sheet-game-tag { color: #2c3e50; }
+  .game-dg .section-card-title, .game-dg .stat-value { color: #7f8c8d; }
+  .game-vtm .sheet-game-tag { color: #8b0000; }
+  .game-vtm .section-card-title, .game-vtm .stat-value { color: #c0392b; }
+  .game-sr .sheet-game-tag { color: #f39c12; }
+  .game-sr .section-card-title, .game-sr .stat-value { color: #f39c12; }
+  .game-com .sheet-game-tag { color: #1abc9c; }
+  .game-com .section-card-title, .game-com .stat-value { color: #1abc9c; }
+  .game-dh .sheet-game-tag { color: #3498db; }
+  .game-dh .section-card-title, .game-dh .stat-value { color: #3498db; }
+  .game-7s .sheet-game-tag { color: #e67e22; }
+  .game-7s .section-card-title, .game-7s .stat-value { color: #e67e22; }
+  .game-scp .sheet-game-tag { color: #27ae60; }
+  .game-scp .section-card-title, .game-scp .stat-value { color: #27ae60; }
+  .game-icons .sheet-game-tag { color: #f1c40f; }
+  .game-icons .section-card-title, .game-icons .stat-value { color: #f1c40f; }
+
+  /* ===== DIVIDER ===== */
+  .divider {
+    height: 1px; background: linear-gradient(90deg, transparent, var(--border), transparent);
+    margin: 1.5rem 0;
+  }
+
+  /* ===== NOTIFICATION ===== */
+  #notification {
+    position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%);
+    background: var(--bg-card); border: 1px solid var(--accent);
+    color: var(--accent); padding: 0.6rem 1.5rem; border-radius: 6px;
+    font-family: 'Share Tech Mono', monospace; font-size: 0.8rem;
+    box-shadow: var(--glow); z-index: 300;
+    opacity: 0; pointer-events: none; transition: opacity 0.3s;
+    letter-spacing: 0.1em;
+  }
+  #notification.show { opacity: 1; }
+
+  /* ===== IMPORT/EXPORT ===== */
+  .export-area { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 6px; padding: 1rem; font-family: 'Share Tech Mono', monospace; font-size: 0.75rem; color: var(--text-secondary); word-break: break-all; max-height: 200px; overflow-y: auto; }
+
+  /* ===== PRINT ===== */
+  @media print {
+    .sidebar, header, .ai-panel, .ai-fab, .modal-overlay { display: none !important; }
+    .content-area { padding: 0; }
+    body { background: white; color: black; }
+    .section-card { border: 1px solid #ccc; }
+  }
+
+  /* ===== RESPONSIVE ===== */
+  @media (max-width: 768px) {
+    .sidebar { display: none; }
+    .ai-panel { width: 100%; }
+    .ai-fab.panel-open { right: 1.5rem; bottom: calc(100vh - 64px - 40px); }
+    .form-grid { grid-template-columns: 1fr; }
+    .form-grid-2, .form-grid-3 { grid-template-columns: 1fr; }
+  }
+
+  /* ===== LOADING SPINNER ===== */
+  .spinner {
+    display: inline-block; width: 16px; height: 16px;
+    border: 2px solid var(--border); border-top-color: var(--accent);
+    border-radius: 50%; animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ===== EMPTY STATE ===== */
+  .empty-state { text-align: center; padding: 3rem; color: var(--text-dim); }
+  .empty-state-icon { font-size: 3rem; margin-bottom: 1rem; opacity: 0.4; }
+  .empty-state-text { font-family: 'Share Tech Mono', monospace; font-size: 0.8rem; letter-spacing: 0.1em; }
+
+  /* ===== TOOLTIP ===== */
+  [data-tip] { position: relative; cursor: help; }
+  [data-tip]:hover::after {
+    content: attr(data-tip);
+    position: absolute; bottom: calc(100% + 5px); left: 50%; transform: translateX(-50%);
+    background: var(--bg-card); border: 1px solid var(--border);
+    color: var(--text-secondary); font-size: 0.72rem; font-family: 'Share Tech Mono', monospace;
+    padding: 0.3rem 0.6rem; border-radius: 4px; white-space: nowrap; z-index: 999;
+    pointer-events: none; letter-spacing: 0.05em;
+  }
+
+  /* ===== PROGRESS RING ===== */
+  .progress-ring-wrap { display: inline-flex; flex-direction: column; align-items: center; gap: 0.3rem; }
+  .progress-ring svg { transform: rotate(-90deg); }
+  .progress-ring-label { font-family: 'Share Tech Mono', monospace; font-size: 0.65rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.1em; }
+
+  /* ===== SPECIFIC SYSTEM STYLES ===== */
+  .coc-derived { display: grid; grid-template-columns: repeat(4,1fr); gap: 0.5rem; }
+  .coc-skill-list { columns: 3; gap: 1rem; }
+  .coc-skill-item { display: flex; align-items: center; gap: 0.4rem; margin-bottom: 0.4rem; break-inside: avoid; }
+  .coc-skill-item input[type="number"] { width: 45px; text-align: center; }
+  .sr-attr-matrix { display: grid; grid-template-columns: repeat(4,1fr); gap: 0.5rem; }
+  .vtm-dot-row { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.4rem; }
+  .vtm-dots { display: flex; gap: 3px; }
+  .vtm-dot {
+    width: 14px; height: 14px; border-radius: 50%; border: 1px solid var(--border);
+    cursor: pointer; transition: all 0.15s;
+  }
+  .vtm-dot.filled { background: var(--red); border-color: var(--red-bright); }
+  .vtm-dot-label { flex: 1; font-size: 0.85rem; }
+  .com-tag-row { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.5rem; }
+  .com-tag {
+    padding: 0.3rem 0.8rem; border-radius: 4px;
+    font-size: 0.82rem; border: 1px solid;
+    font-family: 'Share Tech Mono', monospace; font-size: 0.7rem;
+  }
+  .theme-card {
+    border: 1px solid var(--border); border-radius: 8px; padding: 1rem; margin-bottom: 0.8rem;
+    background: var(--bg-card2);
+  }
+  .theme-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.7rem; }
+  .theme-type-badge {
+    font-family: 'Share Tech Mono', monospace; font-size: 0.65rem; letter-spacing: 0.1em;
+    text-transform: uppercase; padding: 0.2rem 0.5rem; border-radius: 3px;
+    background: rgba(255,255,255,0.05); border: 1px solid var(--border);
+  }
+
+  /* ===== SIDEBAR SORTING ===== */
+  .sidebar-sort-bar {
+    display: flex; gap: 4px; flex-wrap: wrap;
+    padding: 0.6rem 1rem; border-bottom: 1px solid var(--border);
+    background: var(--bg-card);
+  }
+  .sort-btn {
+    font-family: 'Share Tech Mono', monospace; font-size: 0.6rem;
+    padding: 0.2rem 0.5rem; border-radius: 3px; cursor: pointer;
+    border: 1px solid var(--border); background: none;
+    color: var(--text-dim); transition: all 0.15s; letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+  .sort-btn:hover { border-color: var(--border-bright); color: var(--text-secondary); }
+  .sort-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(200,168,75,0.1); }
+  .sidebar-search {
+    width: 100%; padding: 0.5rem 0.8rem;
+    background: var(--bg-card2); border: none; border-bottom: 1px solid var(--border);
+    color: var(--text-primary); font-family: 'Share Tech Mono', monospace; font-size: 0.75rem;
+    outline: none; letter-spacing: 0.05em;
+  }
+  .sidebar-search::placeholder { color: var(--text-dim); }
+  .cat-header {
+    padding: 0.3rem 0.6rem; font-family: 'Share Tech Mono', monospace;
+    font-size: 0.6rem; letter-spacing: 0.15em; text-transform: uppercase;
+    color: var(--text-dim); background: rgba(255,255,255,0.02);
+    border-bottom: 1px solid var(--border); cursor: pointer;
+    display: flex; justify-content: space-between; align-items: center;
+    user-select: none;
+  }
+  .cat-header:hover { color: var(--text-secondary); }
+  .cat-header.collapsed + .cat-items { display: none; }
+  .cat-items {}
+  .cat-chevron { font-size: 0.5rem; transition: transform 0.2s; }
+  .cat-header.collapsed .cat-chevron { transform: rotate(-90deg); }
+
+  /* ===== DICE ROLLER ===== */
+  .dice-area { display: flex; gap: 0.5rem; flex-wrap: wrap; padding: 0.8rem; background: var(--bg-card); border-radius: 8px; border: 1px solid var(--border); }
+  .dice-btn {
+    width: 48px; height: 48px; border-radius: 6px;
+    background: var(--bg-card2); border: 1px solid var(--border);
+    color: var(--accent); font-family: 'Cinzel', serif; font-size: 0.75rem;
+    cursor: pointer; transition: all 0.2s; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 2px;
+  }
+  .dice-btn:hover { border-color: var(--accent); background: rgba(200,168,75,0.1); box-shadow: var(--glow); }
+  .dice-btn:active { transform: scale(0.92); }
+  .dice-icon { font-size: 1.2rem; }
+  .dice-result {
+    background: var(--bg-card2); border: 1px solid var(--border);
+    border-radius: 6px; padding: 0.5rem 1rem; font-family: 'Cinzel', serif;
+    font-size: 1.5rem; color: var(--accent); min-width: 80px; text-align: center;
+  }
+  .dice-history { font-family: 'Share Tech Mono', monospace; font-size: 0.7rem; color: var(--text-dim); margin-top: 0.4rem; }
+</style>
+</head>
+<body>
+<div id="app">
+  <!-- HEADER -->
+  <header>
+    <div class="logo" onclick="showScreen('welcome')">
+      ⚔ CHARACTER FORGE
+      <span>MULTI-SYSTEM RPG CREATOR</span>
+    </div>
+    <nav class="header-nav">
+      <button class="nav-btn" onclick="showScreen('welcome')">Library</button>
+      <button class="nav-btn" onclick="openNewCharModal()">+ New Character</button>
+      <button class="nav-btn" onclick="openImportModal()">Import</button>
+      <button class="nav-btn" onclick="exportAll()">Export All</button>
+      <button class="nav-btn" onclick="toggleAI()" id="ai-toggle-btn">✦ AI Guide</button>
+    </nav>
+  </header>
+
+  <main>
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+      <input class="sidebar-search" id="sidebar-search" placeholder="🔍 Search systems..." oninput="renderSidebar()" />
+      <div class="sidebar-sort-bar">
+        <button class="sort-btn active" id="sort-cat" onclick="setSortMode('category')">By Genre</button>
+        <button class="sort-btn" id="sort-az" onclick="setSortMode('alpha')">A–Z</button>
+        <button class="sort-btn" id="sort-chars" onclick="setSortMode('chars')">By Chars</button>
+        <button class="sort-btn" id="sort-pub" onclick="setSortMode('publisher')">Publisher</button>
+      </div>
+      <div style="overflow-y:auto;flex:1">
+        <div id="game-list"></div>
+      </div>
+      <div class="sidebar-section" id="char-list-section" style="display:none">
+        <div class="sidebar-title">Characters</div>
+        <div class="char-list" id="char-list"></div>
+        <button class="btn-new" onclick="openNewCharModal()">+ New Character</button>
+      </div>
+    </aside>
+
+    <!-- CONTENT -->
+    <div class="content-area" id="content-area">
+      <div id="screen-welcome" class="screen active"></div>
+      <div id="screen-character" class="screen"></div>
+    </div>
+  </main>
+</div>
+
+<!-- AI PANEL -->
+<div class="ai-panel" id="ai-panel">
+  <div class="ai-panel-header">
+    <div class="ai-panel-title">
+      <div class="ai-status"></div>
+      Lore Keeper AI
+    </div>
+    <button class="ai-close" onclick="toggleAI()">✕</button>
+  </div>
+  <div class="ai-messages" id="ai-messages">
+    <div class="ai-msg system">
+      <div class="ai-msg-label">System</div>
+      Welcome, Adventurer. I am the Lore Keeper — your guide to character creation across all systems. Ask me anything: lore, mechanics, build advice, or have me auto-fill your character sheet.
+    </div>
+  </div>
+  <div class="ai-input-area">
+    <div class="ai-quick-btns" id="ai-quick-btns">
+      <button class="ai-quick-btn" onclick="aiQuick('Explain the basics of this game system')">Game Overview</button>
+      <button class="ai-quick-btn" onclick="aiQuick('Suggest a fun character concept for this game')">Random Concept</button>
+      <button class="ai-quick-btn" onclick="aiQuick('Help me optimize my character build')">Optimize Build</button>
+      <button class="ai-quick-btn" onclick="aiQuick('Explain the lore behind this class/archetype')">Lore Deep-Dive</button>
+      <button class="ai-quick-btn" onclick="aiAutoFill()">✦ Auto-Fill Sheet</button>
+    </div>
+    <div class="ai-input-row">
+      <textarea class="ai-input" id="ai-input" placeholder="Ask the Lore Keeper..." rows="1" onkeydown="aiKeydown(event)"></textarea>
+      <button class="ai-send" id="ai-send-btn" onclick="aiSend()">SEND</button>
+    </div>
+  </div>
+</div>
+
+<!-- FAB -->
+<button class="ai-fab" id="ai-fab" onclick="toggleAI()">✦</button>
+
+<!-- NEW CHARACTER MODAL -->
+<div class="modal-overlay" id="new-char-modal">
+  <div class="modal">
+    <div class="modal-title">⚔ Create New Character</div>
+    <div class="form-group" style="margin-bottom:1rem">
+      <label>Character Name</label>
+      <input type="text" id="nc-name" placeholder="Enter character name..." />
+    </div>
+    <div class="form-group" style="margin-bottom:1rem">
+      <label>Game System</label>
+      <select id="nc-game"></select>
+    </div>
+    <div id="nc-system-fields"></div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeModal('new-char-modal')">Cancel</button>
+      <button class="btn-primary" onclick="createCharacter()">Create Character</button>
+    </div>
+  </div>
+</div>
+
+<!-- IMPORT MODAL -->
+<div class="modal-overlay" id="import-modal">
+  <div class="modal">
+    <div class="modal-title">📥 Import Characters</div>
+    <div class="form-group">
+      <label>Paste JSON Data</label>
+      <textarea id="import-text" style="min-height:150px; font-family:'Share Tech Mono',monospace; font-size:0.75rem;" placeholder="Paste exported JSON here..."></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeModal('import-modal')">Cancel</button>
+      <button class="btn-primary" onclick="importChars()">Import</button>
+    </div>
+  </div>
+</div>
+
+<!-- NOTIFICATION -->
+<div id="notification"></div>
+
+<script>
+// ============================================================
+// GAME SYSTEM DEFINITIONS
+// ============================================================
+const GAME_SYSTEMS = {
+  dnd5e: {
+    name: "D&D 5th Edition",
+    icon: "🐉",
+    color: "#e74c3c",
+    category: "Fantasy",
+    publisher: "Wizards of the Coast",
+    desc: "Dungeons & Dragons 5th Edition",
+    fields: {
+      basic: ["race","class","subclass","background","alignment","level","xp"],
+      stats: ["STR","DEX","CON","INT","WIS","CHA"],
+      resources: [
+        {name:"Hit Points",max:10,color:"#e74c3c"},
+        {name:"Temp HP",max:0,color:"#f39c12"},
+        {name:"Spell Slots",max:0,color:"#3498db"}
+      ],
+      tabs:["Core","Skills","Spells","Equipment","Features","Notes","Dice"]
+    }
+  },
+  pf2e: {
+    name: "Pathfinder 2e",
+    icon: "🗡",
+    color: "#e67e22",
+    category: "Fantasy",
+    publisher: "Paizo",
+    desc: "Pathfinder Second Edition",
+    fields: {
+      basic: ["ancestry","heritage","class","background","alignment","level"],
+      stats: ["STR","DEX","CON","INT","WIS","CHA"],
+      resources: [
+        {name:"Hit Points",max:10,color:"#e67e22"},
+        {name:"Hero Points",max:3,color:"#f39c12"},
+        {name:"Focus Points",max:0,color:"#9b59b6"}
+      ],
+      tabs:["Core","Skills","Feats","Spells","Equipment","Notes","Dice"]
+    }
+  },
+  coc7: {
+    name: "Call of Cthulhu 7e",
+    icon: "🐙",
+    color: "#8e44ad",
+    category: "Horror",
+    publisher: "Chaosium",
+    desc: "Chaosium's Call of Cthulhu 7th Edition",
+    fields: {
+      basic: ["occupation","age","birthplace","residence","era"],
+      stats: ["STR","DEX","CON","INT","SIZ","APP","POW","EDU","LCK"],
+      resources: [
+        {name:"Hit Points",max:10,color:"#8e44ad"},
+        {name:"Sanity",max:50,color:"#3498db"},
+        {name:"Magic Points",max:10,color:"#1abc9c"},
+        {name:"Luck",max:50,color:"#f39c12"}
+      ],
+      tabs:["Core","Skills","Backstory","Equipment","Notes","Dice"]
+    }
+  },
+  dg: {
+    name: "Delta Green",
+    icon: "☢",
+    color: "#7f8c8d",
+    category: "Horror",
+    publisher: "Arc Dream Publishing",
+    desc: "Arc Dream Publishing's Delta Green",
+    fields: {
+      basic: ["occupation","employer","nationality","age","gender","distinguishing_features"],
+      stats: ["STR","CON","DEX","INT","POW","CHA","EDU"],
+      resources: [
+        {name:"Hit Points",max:10,color:"#7f8c8d"},
+        {name:"Willpower",max:10,color:"#3498db"},
+        {name:"Sanity",max:70,color:"#27ae60"},
+        {name:"Breaking Point",max:0,color:"#e74c3c"}
+      ],
+      tabs:["Core","Skills","Bonds","Disorders","Equipment","Notes","Dice"]
+    }
+  },
+  scp: {
+    name: "SCP: The RPG",
+    icon: "⚠",
+    color: "#27ae60",
+    category: "Horror / Sci-Fi",
+    publisher: "SCP Community",
+    desc: "SCP Foundation Roleplaying Game",
+    fields: {
+      basic: ["clearance_level","department","position","specialist_field","designation"],
+      stats: ["PHY","MEN","SOC","COM","SCI","TAC"],
+      resources: [
+        {name:"Health",max:10,color:"#27ae60"},
+        {name:"Stress",max:10,color:"#e74c3c"},
+        {name:"Morale",max:10,color:"#3498db"},
+        {name:"Anomaly Points",max:0,color:"#9b59b6"}
+      ],
+      tabs:["Core","Skills","Training","Anomalies","Equipment","Notes","Dice"]
+    }
+  },
+  vtm5: {
+    name: "Vampire: The Masquerade 5e",
+    icon: "🧛",
+    color: "#8b0000",
+    category: "World of Darkness",
+    publisher: "Renegade Game Studios",
+    desc: "Renegade Game Studios / World of Darkness",
+    fields: {
+      basic: ["clan","sire","generation","concept","predator_type","ambition","desire"],
+      stats: ["STR","DEX","STA","CHA","MAN","COM","INT","WIT","RES"],
+      resources: [
+        {name:"Health",max:5,color:"#8b0000"},
+        {name:"Willpower",max:5,color:"#3498db"},
+        {name:"Hunger",max:5,color:"#e74c3c"},
+        {name:"Humanity",max:7,color:"#f39c12"}
+      ],
+      tabs:["Core","Skills","Disciplines","Merits","Bonds","Backstory","Notes","Dice"]
+    }
+  },
+  wta5: {
+    name: "Werewolf: The Apocalypse 5e",
+    icon: "🐺",
+    color: "#27ae60",
+    category: "World of Darkness",
+    publisher: "Renegade Game Studios",
+    desc: "Renegade Game Studios",
+    fields: {
+      basic: ["tribe","auspice","breed","totem","pack","rank","renown"],
+      stats: ["STR","DEX","STA","CHA","MAN","COM","INT","WIT","RES"],
+      resources: [
+        {name:"Health (Hum)",max:5,color:"#27ae60"},
+        {name:"Health (Lup)",max:7,color:"#2ecc71"},
+        {name:"Willpower",max:5,color:"#3498db"},
+        {name:"Rage",max:5,color:"#e74c3c"},
+        {name:"Gnosis",max:5,color:"#f39c12"},
+        {name:"Glory",max:0,color:"#f1c40f"},
+        {name:"Honor",max:0,color:"#e67e22"},
+        {name:"Wisdom",max:0,color:"#9b59b6"}
+      ],
+      tabs:["Core","Skills","Gifts","Rites","Pack","Backstory","Notes","Dice"]
+    }
+  },
+  mta5: {
+    name: "Mage: The Ascension 20th",
+    icon: "✨",
+    color: "#9b59b6",
+    category: "World of Darkness",
+    publisher: "Onyx Path Publishing",
+    desc: "Onyx Path Publishing",
+    fields: {
+      basic: ["tradition_convention","essence","nature","demeanor","affiliation","arete","quintessence"],
+      stats: ["STR","DEX","STA","CHA","MAN","APP","INT","WIT","PER"],
+      resources: [
+        {name:"Health",max:7,color:"#9b59b6"},
+        {name:"Willpower",max:5,color:"#3498db"},
+        {name:"Quintessence",max:10,color:"#f1c40f"},
+        {name:"Paradox",max:0,color:"#e74c3c"}
+      ],
+      tabs:["Core","Abilities","Spheres","Backgrounds","Advantages","Notes","Dice"]
+    }
+  },
+  ctr5: {
+    name: "Changeling: The Lost 2e",
+    icon: "🍄",
+    color: "#1abc9c",
+    category: "World of Darkness",
+    publisher: "Onyx Path Publishing",
+    desc: "Onyx Path Publishing",
+    fields: {
+      basic: ["seeming","kith","court","motley","keeper_name","clarity"],
+      stats: ["INT","WIT","RES","STR","DEX","STA","PRE","MAN","COM"],
+      resources: [
+        {name:"Wyrd",max:3,color:"#1abc9c"},
+        {name:"Glamour",max:10,color:"#9b59b6"},
+        {name:"Willpower",max:5,color:"#3498db"},
+        {name:"Clarity",max:7,color:"#f1c40f"}
+      ],
+      tabs:["Core","Skills","Contracts","Merits","Pledges","Notes","Dice"]
+    }
+  },
+  htr5: {
+    name: "Hunter: The Reckoning 5e",
+    icon: "🏹",
+    color: "#e67e22",
+    category: "World of Darkness",
+    publisher: "Renegade Game Studios",
+    desc: "Renegade Game Studios",
+    fields: {
+      basic: ["creed","drive","monster_knowledge","cell","tier"],
+      stats: ["STR","DEX","STA","CHA","MAN","COM","INT","WIT","RES"],
+      resources: [
+        {name:"Health",max:5,color:"#e67e22"},
+        {name:"Willpower",max:5,color:"#3498db"},
+        {name:"Desperation",max:5,color:"#e74c3c"},
+        {name:"Danger",max:5,color:"#c0392b"}
+      ],
+      tabs:["Core","Skills","Edges","Perks","Cell","Notes","Dice"]
+    }
+  },
+  sr6: {
+    name: "Shadowrun 6th World",
+    icon: "🤖",
+    color: "#f39c12",
+    category: "Cyberpunk",
+    publisher: "Catalyst Game Labs",
+    desc: "Catalyst Game Labs",
+    fields: {
+      basic: ["metatype","sex","age","height","weight","street_name","rep","notoriety"],
+      stats: ["BOD","AGI","REA","STR","WIL","LOG","INT","CHA","EDG","ESS","MAG","RES"],
+      resources: [
+        {name:"Physical Monitor",max:10,color:"#f39c12"},
+        {name:"Stun Monitor",max:10,color:"#3498db"},
+        {name:"Essence",max:6,color:"#2ecc71"},
+        {name:"Edge",max:4,color:"#f1c40f"}
+      ],
+      tabs:["Core","Skills","Augments","Programs","Contacts","Gear","Notes","Dice"]
+    }
+  },
+  cp_red: {
+    name: "Cyberpunk RED",
+    icon: "💀",
+    color: "#e74c3c",
+    category: "Cyberpunk",
+    publisher: "R. Talsorian Games",
+    desc: "R. Talsorian Games",
+    fields: {
+      basic: ["role","handle","age","cultural_origin","language","clothing_style","hairstyle"],
+      stats: ["INT","REF","DEX","TECH","COOL","WILL","LUCK","MOVE","BODY","EMP"],
+      resources: [
+        {name:"HP",max:30,color:"#e74c3c"},
+        {name:"Humanity",max:40,color:"#f39c12"},
+        {name:"Death Save",max:5,color:"#c0392b"}
+      ],
+      tabs:["Core","Skills","Cyberware","Gear","Contacts","Backstory","Notes","Dice"]
+    }
+  },
+  sw_rpg: {
+    name: "Star Wars FFG",
+    icon: "⭐",
+    color: "#f1c40f",
+    category: "Sci-Fi",
+    publisher: "Fantasy Flight Games",
+    desc: "Fantasy Flight Games",
+    fields: {
+      basic: ["species","career","specialization","obligation","motivation","age","gender"],
+      stats: ["BR","AG","INT","CUN","WIL","PR"],
+      resources: [
+        {name:"Wound Threshold",max:12,color:"#e74c3c"},
+        {name:"Strain Threshold",max:12,color:"#3498db"},
+        {name:"Force Rating",max:0,color:"#f1c40f"},
+        {name:"Conflict",max:0,color:"#8e44ad"}
+      ],
+      tabs:["Core","Skills","Talents","Force Powers","Equipment","Notes","Dice"]
+    }
+  },
+  fate_core: {
+    name: "FATE Core",
+    icon: "⊕",
+    color: "#3498db",
+    category: "Narrative",
+    publisher: "Evil Hat Productions",
+    desc: "Evil Hat Productions",
+    fields: {
+      basic: ["high_concept","trouble","concept3","concept4","concept5"],
+      stats: [],
+      resources: [
+        {name:"Fate Points",max:3,color:"#3498db"},
+        {name:"Stress 1",max:2,color:"#e74c3c"},
+        {name:"Stress 2",max:2,color:"#f39c12"}
+      ],
+      tabs:["Core","Skills","Stunts","Aspects","Extras","Notes","Dice"]
+    }
+  },
+  blades: {
+    name: "Blades in the Dark",
+    icon: "🗡",
+    color: "#2c3e50",
+    category: "Narrative",
+    publisher: "One Seven Design",
+    desc: "One Seven Design",
+    fields: {
+      basic: ["playbook","heritage","background","vice","special_ability","trauma"],
+      stats: [],
+      resources: [
+        {name:"Stress",max:9,color:"#e74c3c"},
+        {name:"Trauma",max:4,color:"#8e44ad"},
+        {name:"Coin",max:4,color:"#f39c12"},
+        {name:"Stash",max:40,color:"#27ae60"}
+      ],
+      tabs:["Core","Actions","Items","Crew","Notes","Dice"]
+    }
+  },
+  masks: {
+    name: "Masks: A New Generation",
+    icon: "🦸",
+    color: "#e74c3c",
+    category: "Superhero",
+    publisher: "Magpie Games",
+    desc: "Magpie Games (Powered by the Apocalypse)",
+    fields: {
+      basic: ["playbook","real_name","look","abilities","when_changed"],
+      stats: ["Danger","Freak","Mundane","Savior","Superior"],
+      resources: [
+        {name:"Conditions",max:5,color:"#e74c3c"},
+        {name:"Influence",max:5,color:"#f39c12"},
+        {name:"Potential",max:5,color:"#3498db"}
+      ],
+      tabs:["Core","Moves","Team","Labels","Notes","Dice"]
+    }
+  },
+  icons: {
+    name: "ICONS Assembled",
+    icon: "⚡",
+    color: "#f1c40f",
+    category: "Superhero",
+    publisher: "Ad Infinitum Adventures",
+    desc: "Ad Infinitum Adventures",
+    fields: {
+      basic: ["origin","background","specialty","determination"],
+      stats: ["Prowess","Coordination","Strength","Intellect","Awareness","Willpower"],
+      resources: [
+        {name:"Stamina",max:10,color:"#f1c40f"},
+        {name:"Determination",max:5,color:"#3498db"}
+      ],
+      tabs:["Core","Powers","Qualities","Challenges","Equipment","Notes","Dice"]
+    }
+  },
+  city_of_mist: {
+    name: "City of Mist",
+    icon: "🌫",
+    color: "#1abc9c",
+    category: "Noir",
+    publisher: "Son of Oak Game Studio",
+    desc: "Son of Oak Game Studio",
+    fields: {
+      basic: ["mythos","logos","concept","mystery","question"],
+      stats: [],
+      resources: [
+        {name:"Status",max:5,color:"#1abc9c"},
+        {name:"Attention",max:3,color:"#f39c12"}
+      ],
+      tabs:["Themes","Moves","Status","Crew","Notes","Dice"]
+    }
+  },
+  daggerheart: {
+    name: "Daggerheart",
+    icon: "🗡",
+    color: "#3498db",
+    category: "Fantasy",
+    publisher: "Darrington Press",
+    desc: "Darrington Press",
+    fields: {
+      basic: ["class","subclass","community","ancestry","level","background"],
+      stats: ["AGI","STR","FIN","INS","PRE","KNW"],
+      resources: [
+        {name:"Hit Points",max:6,color:"#3498db"},
+        {name:"Hope",max:6,color:"#f1c40f"},
+        {name:"Stress",max:6,color:"#e74c3c"},
+        {name:"Armor Score",max:0,color:"#7f8c8d"}
+      ],
+      tabs:["Core","Experiences","Inventory","Cards","Notes","Dice"]
+    }
+  },
+  seventh_sea: {
+    name: "7th Sea 2nd Edition",
+    icon: "⚓",
+    color: "#e67e22",
+    category: "Swashbuckling",
+    publisher: "John Wick Presents",
+    desc: "John Wick Presents",
+    fields: {
+      basic: ["nation","archetype","religion","reputation","wealth","ship"],
+      stats: ["Brawn","Finesse","Resolve","Wits","Panache"],
+      resources: [
+        {name:"Wounds",max:5,color:"#e74c3c"},
+        {name:"Dramatic Wounds",max:5,color:"#c0392b"},
+        {name:"Raises",max:5,color:"#e67e22"},
+        {name:"Danger Points",max:5,color:"#f39c12"}
+      ],
+      tabs:["Core","Skills","Advantages","Sorcery","Reputation","Notes","Dice"]
+    }
+  },
+  alien_rpg: {
+    name: "ALIEN RPG",
+    icon: "👾",
+    color: "#27ae60",
+    category: "Sci-Fi / Horror",
+    publisher: "Free League Publishing",
+    desc: "Free League Publishing",
+    fields: {
+      basic: ["career","agenda","appearance","buddy","rival","signature_item"],
+      stats: ["STR","AGI","WIT","EMP"],
+      resources: [
+        {name:"Health",max:3,color:"#27ae60"},
+        {name:"Stress",max:10,color:"#e74c3c"},
+        {name:"Air Supply",max:10,color:"#3498db"}
+      ],
+      tabs:["Core","Skills","Talents","Gear","Agenda","Notes","Dice"]
+    }
+  },
+  mothership: {
+    name: "Mothership",
+    icon: "🚀",
+    color: "#95a5a6",
+    category: "Sci-Fi / Horror",
+    publisher: "Tuesday Knight Games",
+    desc: "Tuesday Knight Games",
+    fields: {
+      basic: ["class","pronouns","ship_assignment","specialist_training"],
+      stats: ["STR","Speed","Intellect","Combat"],
+      resources: [
+        {name:"Wounds",max:2,color:"#95a5a6"},
+        {name:"Stress",max:20,color:"#e74c3c"},
+        {name:"Fear Save",max:0,color:"#8e44ad"},
+        {name:"Body Save",max:0,color:"#27ae60"}
+      ],
+      tabs:["Core","Skills","Gear","Conditions","Notes","Dice"]
+    }
+  },
+  pbta_generic: {
+    name: "Powered by the Apocalypse",
+    icon: "☢",
+    color: "#e74c3c",
+    category: "Narrative",
+    publisher: "lumpley games",
+    desc: "Generic PbtA (Apocalypse World, etc.)",
+    fields: {
+      basic: ["playbook","look","gender","faction"],
+      stats: ["Cool","Hard","Hot","Sharp","Weird"],
+      resources: [
+        {name:"Harm",max:6,color:"#e74c3c"},
+        {name:"Experience",max:5,color:"#f39c12"},
+        {name:"Hold",max:0,color:"#3498db"}
+      ],
+      tabs:["Core","Moves","Gear","Hx","Notes","Dice"]
+    }
+  },
+  ose: {
+    name: "Old School Essentials",
+    icon: "📜",
+    color: "#d4a017",
+    category: "OSR",
+    publisher: "Necrotic Gnome",
+    desc: "Necrotic Gnome",
+    fields: {
+      basic: ["class","race","level","alignment","xp","next_level_xp"],
+      stats: ["STR","DEX","CON","INT","WIS","CHA"],
+      resources: [
+        {name:"Hit Points",max:6,color:"#d4a017"},
+        {name:"AC",max:9,color:"#7f8c8d"}
+      ],
+      tabs:["Core","Equipment","Spells","Notes","Dice"]
+    }
+  },
+
+  // ── RENEGADE GAME STUDIOS – LICENSED IPs ──────────
+  transformers_rpg: {
+    name: "Transformers RPG",
+    icon: "🤖",
+    color: "#e63946",
+    category: "Licensed: Renegade",
+    publisher: "Renegade Game Studios",
+    desc: "Renegade Game Studios",
+    fields: {
+      basic: ["alt_mode","faction","function","rank","allegiance","base_of_operations","special_ability"],
+      stats: ["STR","SPD","INT","RANK","COU","FRP"],
+      resources: [
+        {name:"Armor",max:10,color:"#e63946"},
+        {name:"Energon",max:10,color:"#f77f00"},
+        {name:"Overclock",max:5,color:"#4cc9f0"}
+      ],
+      tabs:["Core","Skills","Alt Mode","Upgrades","Allies","Notes","Dice"]
+    }
+  },
+  power_rangers_rpg: {
+    name: "Power Rangers RPG",
+    icon: "⚡",
+    color: "#e63946",
+    category: "Licensed: Renegade",
+    publisher: "Renegade Game Studios",
+    desc: "Renegade Game Studios",
+    fields: {
+      basic: ["ranger_color","zord","team","home_dimension","secret_identity","mentor","power_source"],
+      stats: ["STR","DEX","CON","INT","WIS","CHA"],
+      resources: [
+        {name:"Hit Points",max:10,color:"#e63946"},
+        {name:"Power Tokens",max:5,color:"#f1c40f"},
+        {name:"Zord Points",max:5,color:"#3498db"}
+      ],
+      tabs:["Core","Skills","Powers","Zord","Morphin Grid","Notes","Dice"]
+    }
+  },
+  gi_joe_rpg: {
+    name: "G.I. Joe RPG",
+    icon: "🎖",
+    color: "#2d6a4f",
+    category: "Licensed: Renegade",
+    publisher: "Renegade Game Studios",
+    desc: "Renegade Game Studios",
+    fields: {
+      basic: ["code_name","real_name","mos","specialty","branch","rank","birthplace"],
+      stats: ["STR","DEX","CON","INT","WIS","CHA"],
+      resources: [
+        {name:"Hit Points",max:10,color:"#2d6a4f"},
+        {name:"Ammo",max:30,color:"#f39c12"},
+        {name:"Cover",max:5,color:"#7f8c8d"}
+      ],
+      tabs:["Core","Skills","Equipment","Vehicles","Intel","Notes","Dice"]
+    }
+  },
+  mlp_rpg: {
+    name: "My Little Pony RPG",
+    icon: "🦄",
+    color: "#c77dff",
+    category: "Licensed: Renegade",
+    publisher: "Renegade Game Studios",
+    desc: "Renegade Game Studios",
+    fields: {
+      basic: ["pony_type","cutie_mark","home_town","element","role","quirk"],
+      stats: ["Tenacity","Charm","Wit","Grit","Presence","Insight"],
+      resources: [
+        {name:"Harmony",max:6,color:"#c77dff"},
+        {name:"Friendship Tokens",max:5,color:"#f1c40f"}
+      ],
+      tabs:["Core","Skills","Talents","Quirks","Friends","Notes","Dice"]
+    }
+  },
+  dungeons_and_dragons_cartoon: {
+    name: "Kids on Bikes RPG",
+    icon: "🚲",
+    color: "#4361ee",
+    category: "Narrative",
+    publisher: "Renegade Game Studios",
+    desc: "Renegade Game Studios",
+    fields: {
+      basic: ["archetype","drive","problem","quirk","adult_character"],
+      stats: ["Fight","Brains","Flight","Charm","Grit","Sneak"],
+      resources: [
+        {name:"Tokens",max:5,color:"#4361ee"},
+        {name:"Fear",max:6,color:"#e74c3c"}
+      ],
+      tabs:["Core","Abilities","Gear","Briar","Notes","Dice"]
+    }
+  },
+
+  // ── MARVEL ──────────────────────────────────────
+  marvel_multiverse: {
+    name: "Marvel Multiverse RPG",
+    icon: "🕷",
+    color: "#e23636",
+    category: "Superhero",
+    publisher: "Marvel Entertainment",
+    desc: "Marvel Entertainment / Matt Forbeck",
+    fields: {
+      basic: ["rank","occupation","team","base_of_operations","origin","real_name","public_identity"],
+      stats: ["Melee","Agility","Resilience","Vigilance","Ego","Logic"],
+      resources: [
+        {name:"Health",max:30,color:"#e23636"},
+        {name:"Focus",max:20,color:"#3498db"},
+        {name:"Karma",max:10,color:"#f1c40f"}
+      ],
+      tabs:["Core","Powers","Skills","Tags","Equipment","Notes","Dice"]
+    }
+  },
+
+  // ── MORE SUPERHERO ───────────────────────────────
+  mutants_and_masterminds: {
+    name: "Mutants & Masterminds 3e",
+    icon: "💪",
+    color: "#3498db",
+    category: "Superhero",
+    publisher: "Green Ronin",
+    desc: "Green Ronin Publishing",
+    fields: {
+      basic: ["power_level","identity","group","base","origin","archetype"],
+      stats: ["STR","STA","AGL","DEX","FGT","INT","AWE","PRE"],
+      resources: [
+        {name:"Toughness",max:10,color:"#3498db"},
+        {name:"Hero Points",max:3,color:"#f1c40f"},
+        {name:"Power Points",max:15,color:"#9b59b6"}
+      ],
+      tabs:["Core","Powers","Skills","Advantages","Equipment","Notes","Dice"]
+    }
+  },
+  dc_heroes: {
+    name: "DC Heroes RPG (Mayfair)",
+    icon: "🦇",
+    color: "#1a1a2e",
+    category: "Superhero",
+    publisher: "Mayfair Games",
+    desc: "Mayfair Games / DC Comics",
+    fields: {
+      basic: ["hero_name","secret_identity","team","motivation","wealth"],
+      stats: ["DEX","STR","BODY","INT","WILL","MIND","INF","AUR","SPI"],
+      resources: [
+        {name:"Hero Points",max:50,color:"#f1c40f"},
+        {name:"Initiative",max:0,color:"#3498db"}
+      ],
+      tabs:["Core","Powers","Skills","Equipment","Notes","Dice"]
+    }
+  },
+  sentinels_comics: {
+    name: "Sentinels Comics RPG",
+    icon: "🦸",
+    color: "#e74c3c",
+    category: "Superhero",
+    publisher: "Greater Than Games",
+    desc: "Greater Than Games",
+    fields: {
+      basic: ["archetype","personality","power_source","background","status"],
+      stats: ["Max","PHY","MEN","QCK"],
+      resources: [
+        {name:"HP",max:30,color:"#e74c3c"},
+        {name:"Dice Pool",max:5,color:"#3498db"}
+      ],
+      tabs:["Core","Powers","Qualities","Equipment","Notes","Dice"]
+    }
+  },
+  supers_revised: {
+    name: "SUPERS! Revised",
+    icon: "⚡",
+    color: "#f39c12",
+    category: "Superhero",
+    publisher: "HAZARD Studio",
+    desc: "HAZARD Studio",
+    fields: {
+      basic: ["origin","affiliation","motivation","secret_identity"],
+      stats: ["Combat","Composure","Fortitude","Reaction","Willpower"],
+      resources: [
+        {name:"Hits",max:5,color:"#f39c12"},
+        {name:"Hero Dice",max:3,color:"#3498db"}
+      ],
+      tabs:["Core","Powers","Skills","Notes","Dice"]
+    }
+  },
+
+  // ── FANTASY EXTRAS ───────────────────────────────
+  dnd4e: {
+    name: "D&D 4th Edition",
+    icon: "🐲",
+    color: "#c0392b",
+    category: "Fantasy",
+    publisher: "Wizards of the Coast",
+    desc: "Wizards of the Coast",
+    fields: {
+      basic: ["race","class","paragon_path","epic_destiny","background","level"],
+      stats: ["STR","CON","DEX","INT","WIS","CHA"],
+      resources: [
+        {name:"Hit Points",max:26,color:"#c0392b"},
+        {name:"Bloodied",max:13,color:"#e74c3c"},
+        {name:"Healing Surges",max:10,color:"#27ae60"},
+        {name:"Action Points",max:1,color:"#f39c12"}
+      ],
+      tabs:["Core","Skills","Powers","Equipment","Notes","Dice"]
+    }
+  },
+  pf1e: {
+    name: "Pathfinder 1e",
+    icon: "⚔",
+    color: "#d35400",
+    category: "Fantasy",
+    publisher: "Paizo",
+    desc: "Paizo Publishing",
+    fields: {
+      basic: ["race","class","archetype","alignment","deity","background","level"],
+      stats: ["STR","DEX","CON","INT","WIS","CHA"],
+      resources: [
+        {name:"Hit Points",max:10,color:"#d35400"},
+        {name:"Mythic Tier",max:0,color:"#9b59b6"},
+        {name:"Grit / Panache",max:0,color:"#f39c12"}
+      ],
+      tabs:["Core","Skills","Feats","Spells","Equipment","Notes","Dice"]
+    }
+  },
+  dragonbane: {
+    name: "Dragonbane",
+    icon: "🐉",
+    color: "#c0392b",
+    category: "Fantasy",
+    publisher: "Free League Publishing",
+    desc: "Free League Publishing",
+    fields: {
+      basic: ["kin","profession","weakness","age","appearance"],
+      stats: ["STR","CON","AGI","INT","WIL","CHA"],
+      resources: [
+        {name:"HP",max:10,color:"#c0392b"},
+        {name:"WP",max:10,color:"#3498db"}
+      ],
+      tabs:["Core","Skills","Spells","Equipment","Notes","Dice"]
+    }
+  },
+  forbidden_lands: {
+    name: "Forbidden Lands",
+    icon: "🗺",
+    color: "#a0522d",
+    category: "Fantasy",
+    publisher: "Free League Publishing",
+    desc: "Free League Publishing",
+    fields: {
+      basic: ["kin","profession","age","appearance","pride","dark_secret"],
+      stats: ["STR","AGI","WIT","EMP"],
+      resources: [
+        {name:"Strength",max:4,color:"#a0522d"},
+        {name:"Agility",max:4,color:"#27ae60"},
+        {name:"Wits",max:4,color:"#3498db"},
+        {name:"Empathy",max:4,color:"#9b59b6"}
+      ],
+      tabs:["Core","Skills","Talents","Equipment","Notes","Dice"]
+    }
+  },
+  age_13th: {
+    name: "13th Age",
+    icon: "🌟",
+    color: "#8e44ad",
+    category: "Fantasy",
+    publisher: "Pelgrane Press",
+    desc: "Pelgrane Press",
+    fields: {
+      basic: ["race","class","one_unique_thing","icon_relationships","backgrounds","level"],
+      stats: ["STR","CON","DEX","INT","WIS","CHA"],
+      resources: [
+        {name:"Hit Points",max:20,color:"#8e44ad"},
+        {name:"Recoveries",max:8,color:"#27ae60"},
+        {name:"Command Points",max:0,color:"#f39c12"}
+      ],
+      tabs:["Core","Skills","Powers","Icons","Equipment","Notes","Dice"]
+    }
+  },
+  dungeon_world: {
+    name: "Dungeon World",
+    icon: "🏰",
+    color: "#795548",
+    category: "Fantasy",
+    publisher: "Sage Kobold Productions",
+    desc: "Powered by the Apocalypse — Fantasy",
+    fields: {
+      basic: ["class","race","alignment","look","bonds"],
+      stats: ["STR","DEX","CON","INT","WIS","CHA"],
+      resources: [
+        {name:"HP",max:16,color:"#795548"},
+        {name:"XP",max:7,color:"#f39c12"},
+        {name:"Load",max:7,color:"#7f8c8d"}
+      ],
+      tabs:["Core","Moves","Equipment","Bonds","Notes","Dice"]
+    }
+  },
+  warhammer_4e: {
+    name: "Warhammer Fantasy RPG 4e",
+    icon: "⚒",
+    color: "#b71c1c",
+    category: "Fantasy",
+    publisher: "Cubicle 7",
+    desc: "Cubicle 7 Entertainment",
+    fields: {
+      basic: ["species","class","career","career_tier","status","ambitions","party_ambition"],
+      stats: ["WS","BS","S","T","I","AG","DEX","INT","WP","FEL"],
+      resources: [
+        {name:"Wounds",max:12,color:"#b71c1c"},
+        {name:"Fate",max:3,color:"#f39c12"},
+        {name:"Fortune",max:3,color:"#f1c40f"},
+        {name:"Resilience",max:2,color:"#27ae60"},
+        {name:"Resolve",max:2,color:"#3498db"},
+        {name:"Corruption",max:0,color:"#9b59b6"}
+      ],
+      tabs:["Core","Skills","Talents","Trappings","Notes","Dice"]
+    }
+  },
+  symbaroum: {
+    name: "Symbaroum",
+    icon: "🌲",
+    color: "#1b5e20",
+    category: "Fantasy",
+    publisher: "Free League Publishing",
+    desc: "Free League Publishing",
+    fields: {
+      basic: ["archetype","race","origin","shadow","corruption","quest"],
+      stats: ["ACC","CUN","DIS","PER","PRE","QUI","RES","STR","VIG"],
+      resources: [
+        {name:"Toughness",max:10,color:"#1b5e20"},
+        {name:"Shadow Corruption",max:0,color:"#4a148c"}
+      ],
+      tabs:["Core","Abilities","Equipment","Notes","Dice"]
+    }
+  },
+  torchbearer: {
+    name: "Torchbearer 2e",
+    icon: "🕯",
+    color: "#ff6f00",
+    category: "OSR",
+    publisher: "Burning Wheel HQ",
+    desc: "Burning Wheel HQ",
+    fields: {
+      basic: ["stock","class","hometown","home","raiment","hair","skin","special"],
+      stats: ["Will","Health","Nature","Circles","Resources"],
+      resources: [
+        {name:"Conditions",max:5,color:"#ff6f00"},
+        {name:"Checks",max:5,color:"#3498db"}
+      ],
+      tabs:["Core","Skills","Gear","Notes","Dice"]
+    }
+  },
+  lancer: {
+    name: "Lancer RPG",
+    icon: "🚀",
+    color: "#00b4d8",
+    category: "Sci-Fi",
+    publisher: "Massif Press",
+    desc: "Massif Press",
+    fields: {
+      basic: ["callsign","background","license_level","frame","manufacturer","grit"],
+      stats: ["HULL","AGI","SYS","ENG"],
+      resources: [
+        {name:"HP",max:10,color:"#00b4d8"},
+        {name:"Mech HP",max:20,color:"#0077b6"},
+        {name:"Heat Cap",max:8,color:"#e63946"},
+        {name:"Repair Cap",max:5,color:"#27ae60"},
+        {name:"Overcharge",max:4,color:"#f39c12"}
+      ],
+      tabs:["Core","Mech Build","Skills","Pilot Gear","Notes","Dice"]
+    }
+  },
+  starfinder: {
+    name: "Starfinder 1e",
+    icon: "🌠",
+    color: "#1565c0",
+    category: "Sci-Fi",
+    publisher: "Paizo",
+    desc: "Paizo Publishing",
+    fields: {
+      basic: ["race","class","theme","deity","home_world","level"],
+      stats: ["STR","DEX","CON","INT","WIS","CHA"],
+      resources: [
+        {name:"Stamina",max:6,color:"#1565c0"},
+        {name:"Hit Points",max:10,color:"#e74c3c"},
+        {name:"Resolve",max:3,color:"#f39c12"}
+      ],
+      tabs:["Core","Skills","Feats","Spells","Equipment","Notes","Dice"]
+    }
+  },
+  the_one_ring: {
+    name: "The One Ring 2e",
+    icon: "💍",
+    color: "#b8860b",
+    category: "Fantasy",
+    publisher: "Free League Publishing",
+    desc: "Free League Publishing (Tolkien)",
+    fields: {
+      basic: ["culture","calling","shadow_path","distinctive_feature","renowned_feature","age"],
+      stats: ["Body","Heart","Wits"],
+      resources: [
+        {name:"Endurance",max:20,color:"#b8860b"},
+        {name:"Hope",max:15,color:"#f1c40f"},
+        {name:"Shadow",max:0,color:"#4a148c"},
+        {name:"Wound Threshold",max:0,color:"#e74c3c"}
+      ],
+      tabs:["Core","Skills","Traits","Rewards","Fellowship","Notes","Dice"]
+    }
+  },
+  numenera: {
+    name: "Numenera",
+    icon: "🔮",
+    color: "#00897b",
+    category: "Sci-Fantasy",
+    publisher: "Monte Cook Games",
+    desc: "Monte Cook Games",
+    fields: {
+      basic: ["descriptor","type","focus","tier","effort","xp"],
+      stats: ["Might","Speed","Intellect"],
+      resources: [
+        {name:"Might Pool",max:10,color:"#00897b"},
+        {name:"Speed Pool",max:10,color:"#3498db"},
+        {name:"Intellect Pool",max:10,color:"#9b59b6"},
+        {name:"Cypher Limit",max:2,color:"#f39c12"}
+      ],
+      tabs:["Core","Skills","Abilities","Cyphers","Equipment","Notes","Dice"]
+    }
+  },
+  the_strange: {
+    name: "The Strange",
+    icon: "🌀",
+    color: "#6a1b9a",
+    category: "Sci-Fantasy",
+    publisher: "Monte Cook Games",
+    desc: "Monte Cook Games",
+    fields: {
+      basic: ["descriptor","focus","type","recursion","translation_limit","tier"],
+      stats: ["Might","Speed","Intellect"],
+      resources: [
+        {name:"Might Pool",max:10,color:"#6a1b9a"},
+        {name:"Speed Pool",max:10,color:"#3498db"},
+        {name:"Intellect Pool",max:10,color:"#9b59b6"}
+      ],
+      tabs:["Core","Skills","Abilities","Translations","Equipment","Notes","Dice"]
+    }
+  },
+
+  // ── HORROR EXTRAS ────────────────────────────────
+  vaesen: {
+    name: "Vaesen",
+    icon: "👁",
+    color: "#263238",
+    category: "Horror",
+    publisher: "Free League Publishing",
+    desc: "Free League Publishing",
+    fields: {
+      basic: ["archetype","age","dark_secret","gear","resources","experience"],
+      stats: ["Physique","Precision","Logic","Empathy"],
+      resources: [
+        {name:"Health",max:4,color:"#263238"},
+        {name:"Wits",max:4,color:"#3498db"},
+        {name:"Conditions",max:4,color:"#c0392b"}
+      ],
+      tabs:["Core","Skills","Talents","Equipment","Notes","Dice"]
+    }
+  },
+  dread: {
+    name: "Dread RPG",
+    icon: "🎲",
+    color: "#1a1a1a",
+    category: "Horror",
+    publisher: "The Impossible Dream",
+    desc: "The Impossible Dream (Jenga-based)",
+    fields: {
+      basic: ["questionnaire_summary","role","appearance","history","motivation","fear"],
+      stats: [],
+      resources: [
+        {name:"Jenga Tower Height",max:50,color:"#1a1a1a"}
+      ],
+      tabs:["Core","Questionnaire","Notes"]
+    }
+  },
+  kult: {
+    name: "KULT: Divinity Lost",
+    icon: "☠",
+    color: "#880e4f",
+    category: "Horror",
+    publisher: "Helmgast",
+    desc: "Helmgast AB",
+    fields: {
+      basic: ["archetype","dark_secret","disadvantages","advantages","relation"],
+      stats: ["Fortitude","Willpower","Intuition","Coolness","Violence","Charisma","Soul"],
+      resources: [
+        {name:"Stability",max:5,color:"#880e4f"},
+        {name:"Wounds",max:5,color:"#c0392b"}
+      ],
+      tabs:["Core","Moves","Gear","Notes","Dice"]
+    }
+  },
+  ten_candles: {
+    name: "Ten Candles",
+    icon: "🕯",
+    color: "#3d1a00",
+    category: "Horror",
+    publisher: "Cavalry Games",
+    desc: "Cavalry Games — Tragic Narrative",
+    fields: {
+      basic: ["virtue","vice","moment","brink","look"],
+      stats: [],
+      resources: [
+        {name:"Candles",max:10,color:"#ff6f00"},
+        {name:"Brink",max:1,color:"#c0392b"}
+      ],
+      tabs:["Core","Traits","Notes"]
+    }
+  },
+
+  // ── SCIFI EXTRAS ─────────────────────────────────
+  eclipse_phase: {
+    name: "Eclipse Phase 2e",
+    icon: "🧠",
+    color: "#00acc1",
+    category: "Sci-Fi",
+    publisher: "Posthuman Studios",
+    desc: "Posthuman Studios",
+    fields: {
+      basic: ["background","faction","morph","aptitude_template","motivation","rep_networks"],
+      stats: ["COG","INT","REF","SAV","SOM","WIL"],
+      resources: [
+        {name:"Lucidity",max:50,color:"#00acc1"},
+        {name:"Wound Threshold",max:0,color:"#e74c3c"},
+        {name:"Trauma Threshold",max:0,color:"#9b59b6"},
+        {name:"Infection Rating",max:0,color:"#27ae60"}
+      ],
+      tabs:["Core","Skills","Gear","Morph","Rep","Notes","Dice"]
+    }
+  },
+  traveller: {
+    name: "Traveller (Mongoose 2e)",
+    icon: "🚀",
+    color: "#0d47a1",
+    category: "Sci-Fi",
+    publisher: "Mongoose Publishing",
+    desc: "Mongoose Publishing",
+    fields: {
+      basic: ["homeworld","terms_served","career","rank","mustering_out","age"],
+      stats: ["STR","DEX","END","INT","EDU","SOC"],
+      resources: [
+        {name:"HP",max:12,color:"#0d47a1"},
+        {name:"PSI",max:0,color:"#9b59b6"},
+        {name:"Credits",max:0,color:"#f39c12"}
+      ],
+      tabs:["Core","Skills","Equipment","Contacts","Notes","Dice"]
+    }
+  },
+  coriolis: {
+    name: "Coriolis: The Third Horizon",
+    icon: "🌙",
+    color: "#e65100",
+    category: "Sci-Fi",
+    publisher: "Free League Publishing",
+    desc: "Free League Publishing",
+    fields: {
+      basic: ["concept","upbringing","tribe","group_concept","reputation","birr"],
+      stats: ["STR","AGI","WIT","EMP"],
+      resources: [
+        {name:"HP",max:5,color:"#e65100"},
+        {name:"Mind Points",max:5,color:"#3498db"},
+        {name:"Darkness Points",max:0,color:"#4a148c"}
+      ],
+      tabs:["Core","Skills","Talents","Ship","Notes","Dice"]
+    }
+  },
+  genesys: {
+    name: "Genesys",
+    icon: "🎯",
+    color: "#00796b",
+    category: "Narrative",
+    publisher: "Fantasy Flight Games",
+    desc: "Fantasy Flight Games",
+    fields: {
+      basic: ["archetype","career","species","motivation","setting_specific"],
+      stats: ["BR","AG","INT","CUN","WIL","PR"],
+      resources: [
+        {name:"Wound Threshold",max:12,color:"#00796b"},
+        {name:"Strain Threshold",max:12,color:"#3498db"},
+        {name:"Defense",max:2,color:"#7f8c8d"}
+      ],
+      tabs:["Core","Skills","Talents","Equipment","Notes","Dice"]
+    }
+  },
+  band_of_blades: {
+    name: "Band of Blades",
+    icon: "⚔",
+    color: "#37474f",
+    category: "Fantasy",
+    publisher: "Evil Hat Productions",
+    desc: "Evil Hat Productions (Forged in the Dark)",
+    fields: {
+      basic: ["playbook","origin","heritage","role","mission"],
+      stats: [],
+      resources: [
+        {name:"Stress",max:9,color:"#37474f"},
+        {name:"Trauma",max:4,color:"#c0392b"}
+      ],
+      tabs:["Core","Actions","Gear","Notes","Dice"]
+    }
+  },
+  scum_and_villainy: {
+    name: "Scum & Villainy",
+    icon: "🚀",
+    color: "#455a64",
+    category: "Sci-Fi",
+    publisher: "Evil Hat Productions",
+    desc: "Evil Hat Productions (Forged in the Dark)",
+    fields: {
+      basic: ["playbook","heritage","background","vice","ship_role"],
+      stats: [],
+      resources: [
+        {name:"Stress",max:9,color:"#455a64"},
+        {name:"Trauma",max:4,color:"#9b59b6"}
+      ],
+      tabs:["Core","Actions","Ship","Contacts","Notes","Dice"]
+    }
+  },
+
+  // ── NARRATIVE EXTRAS ─────────────────────────────
+  ironsworn: {
+    name: "Ironsworn",
+    icon: "🌊",
+    color: "#607d8b",
+    category: "Narrative",
+    publisher: "Shawn Tomkin",
+    desc: "Shawn Tomkin (Free)",
+    fields: {
+      basic: ["edge","heart","iron","shadow","wits","background_vow","assets"],
+      stats: ["Edge","Heart","Iron","Shadow","Wits"],
+      resources: [
+        {name:"Health",max:5,color:"#607d8b"},
+        {name:"Spirit",max:5,color:"#3498db"},
+        {name:"Supply",max:5,color:"#27ae60"},
+        {name:"Momentum",max:10,color:"#f39c12"}
+      ],
+      tabs:["Core","Vows","Assets","Moves","Notes","Dice"]
+    }
+  },
+  starforged: {
+    name: "Ironsworn: Starforged",
+    icon: "⭐",
+    color: "#37474f",
+    category: "Narrative",
+    publisher: "Shawn Tomkin",
+    desc: "Shawn Tomkin (Free)",
+    fields: {
+      basic: ["edge","heart","iron","shadow","wits","background_vow","backstory_prompt"],
+      stats: ["Edge","Heart","Iron","Shadow","Wits"],
+      resources: [
+        {name:"Health",max:5,color:"#37474f"},
+        {name:"Spirit",max:5,color:"#3498db"},
+        {name:"Supply",max:5,color:"#27ae60"},
+        {name:"Momentum",max:10,color:"#f39c12"}
+      ],
+      tabs:["Core","Vows","Assets","Moves","Notes","Dice"]
+    }
+  },
+  apocalypse_world: {
+    name: "Apocalypse World 2e",
+    icon: "🔥",
+    color: "#bf360c",
+    category: "Narrative",
+    publisher: "lumpley games",
+    desc: "lumpley games",
+    fields: {
+      basic: ["playbook","look","gender","hx_priority"],
+      stats: ["Cool","Hard","Hot","Sharp","Weird"],
+      resources: [
+        {name:"Harm",max:6,color:"#bf360c"},
+        {name:"Experience",max:5,color:"#f39c12"}
+      ],
+      tabs:["Core","Moves","Gear","Hx","Notes","Dice"]
+    }
+  },
+  monsterhearts: {
+    name: "Monsterhearts 2",
+    icon: "🧡",
+    color: "#ad1457",
+    category: "Narrative",
+    publisher: "Buried Without Ceremony",
+    desc: "Buried Without Ceremony",
+    fields: {
+      basic: ["skin","look","backstory","sex_move","darkest_self"],
+      stats: ["Hot","Cold","Volatile","Dark"],
+      resources: [
+        {name:"Harm",max:4,color:"#ad1457"},
+        {name:"Strings",max:5,color:"#f39c12"},
+        {name:"Experience",max:5,color:"#3498db"}
+      ],
+      tabs:["Core","Moves","Gear","Strings","Notes","Dice"]
+    }
+  },
+  root_rpg: {
+    name: "Root: The RPG",
+    icon: "🦊",
+    color: "#e65100",
+    category: "Narrative",
+    publisher: "Magpie Games",
+    desc: "Magpie Games (Forged in the Dark)",
+    fields: {
+      basic: ["playbook","species","background","vagabond_type","drives","connections"],
+      stats: [],
+      resources: [
+        {name:"Exhaustion",max:4,color:"#e65100"},
+        {name:"Injury",max:4,color:"#c0392b"},
+        {name:"Depletion",max:4,color:"#f39c12"},
+        {name:"Notoriety",max:4,color:"#8e44ad"}
+      ],
+      tabs:["Core","Moves","Gear","Notes","Dice"]
+    }
+  },
+  fiasco: {
+    name: "Fiasco (RPG)",
+    icon: "🎭",
+    color: "#e53935",
+    category: "Narrative",
+    publisher: "Bully Pulpit Games",
+    desc: "Bully Pulpit Games",
+    fields: {
+      basic: ["name","relationship_left","need","object_or_location","relationship_right","tilt"],
+      stats: [],
+      resources: [
+        {name:"White Dice",max:10,color:"#ffffff"},
+        {name:"Black Dice",max:10,color:"#000000"}
+      ],
+      tabs:["Core","Setup","Act 1","Act 2","Notes"]
+    }
+  },
+  wanderhome: {
+    name: "Wanderhome",
+    icon: "🌸",
+    color: "#7986cb",
+    category: "Narrative",
+    publisher: "Jay Dragon",
+    desc: "Jay Dragon (Belonging Outside Belonging)",
+    fields: {
+      basic: ["playbook","name","look","demeanor","home","current_season"],
+      stats: [],
+      resources: [
+        {name:"Token",max:5,color:"#7986cb"}
+      ],
+      tabs:["Core","Traits","Journey","Notes"]
+    }
+  },
+  electric_bastionland: {
+    name: "Electric Bastionland",
+    icon: "🏙",
+    color: "#ff5722",
+    category: "OSR",
+    publisher: "Chris McDowall",
+    desc: "Chris McDowall",
+    fields: {
+      basic: ["failed_career","debt","hometown","drive","partner","treasure"],
+      stats: ["STR","DEX","CHA"],
+      resources: [
+        {name:"HP",max:4,color:"#ff5722"},
+        {name:"Debt",max:10000,color:"#f39c12"}
+      ],
+      tabs:["Core","Gear","Notes","Dice"]
+    }
+  },
+  knave: {
+    name: "Knave 2e",
+    icon: "🎒",
+    color: "#795548",
+    category: "OSR",
+    publisher: "Ben Milton",
+    desc: "Ben Milton",
+    fields: {
+      basic: ["level","background","appearance","personality","virtue","flaw"],
+      stats: ["STR","DEX","CON","INT","WIS","CHA"],
+      resources: [
+        {name:"HP",max:8,color:"#795548"},
+        {name:"Armor",max:11,color:"#7f8c8d"},
+        {name:"Carry Slots",max:10,color:"#f39c12"}
+      ],
+      tabs:["Core","Inventory","Spells","Notes","Dice"]
+    }
+  },
+  into_the_odd: {
+    name: "Into the Odd",
+    icon: "🌀",
+    color: "#37474f",
+    category: "OSR",
+    publisher: "Free League Publishing",
+    desc: "Free League Publishing",
+    fields: {
+      basic: ["archetype","background","drive","feature"],
+      stats: ["STR","DEX","WIL"],
+      resources: [
+        {name:"HP",max:4,color:"#37474f"}
+      ],
+      tabs:["Core","Inventory","Arcanum","Notes","Dice"]
+    }
+  },
+  award: {
+    name: "A Wizard's Work (AWARD)",
+    icon: "🧙",
+    color: "#7b1fa2",
+    category: "Fantasy",
+    publisher: "Independent",
+    desc: "AWARD System",
+    fields: {
+      basic: ["school","specialization","tower","title"],
+      stats: ["INT","WIS","CHA","DEX","STR","CON"],
+      resources: [
+        {name:"Mana",max:10,color:"#7b1fa2"},
+        {name:"HP",max:6,color:"#e74c3c"}
+      ],
+      tabs:["Core","Spells","Familiars","Notes","Dice"]
+    }
+  },
+
+  // ── URBAN FANTASY ────────────────────────────────
+  dresden_files: {
+    name: "Dresden Files Accelerated",
+    icon: "🔥",
+    color: "#b71c1c",
+    category: "Urban Fantasy",
+    publisher: "Evil Hat Productions",
+    desc: "Evil Hat Productions",
+    fields: {
+      basic: ["high_concept","trouble","aspect3","aspect4","aspect5","mantle","refresh"],
+      stats: [],
+      resources: [
+        {name:"Fate Points",max:3,color:"#b71c1c"},
+        {name:"Stress",max:3,color:"#e74c3c"}
+      ],
+      tabs:["Core","Approaches","Stunts","Mantles","Notes","Dice"]
+    }
+  },
+  urban_shadows: {
+    name: "Urban Shadows 2e",
+    icon: "🌃",
+    color: "#424242",
+    category: "Urban Fantasy",
+    publisher: "Magpie Games",
+    desc: "Magpie Games (PbtA)",
+    fields: {
+      basic: ["playbook","faction","look","corruption_move","debts"],
+      stats: ["Blood","Heart","Mind","Spirit"],
+      resources: [
+        {name:"Harm",max:5,color:"#424242"},
+        {name:"Corruption",max:5,color:"#9b59b6"},
+        {name:"Experience",max:5,color:"#f39c12"}
+      ],
+      tabs:["Core","Moves","Debts","Gear","Notes","Dice"]
+    }
+  },
+  nightbane: {
+    name: "Nightbane RPG",
+    icon: "🌑",
+    color: "#1a237e",
+    category: "Urban Fantasy",
+    publisher: "Palladium Books",
+    desc: "Palladium Books",
+    fields: {
+      basic: ["facade","morphus","origin","occupation","alignment","experience_level"],
+      stats: ["IQ","ME","MA","PS","PP","PE","PB","SPD"],
+      resources: [
+        {name:"SDC",max:50,color:"#1a237e"},
+        {name:"HP",max:20,color:"#e74c3c"},
+        {name:"ISP",max:0,color:"#9b59b6"}
+      ],
+      tabs:["Core","Skills","Powers","Equipment","Notes","Dice"]
+    }
+  },
+
+  // ── HISTORICAL / PERIOD ──────────────────────────
+  pendragon: {
+    name: "Pendragon 6e",
+    icon: "👑",
+    color: "#880e4f",
+    category: "Historical",
+    publisher: "Chaosium",
+    desc: "Chaosium",
+    fields: {
+      basic: ["homeland","culture","religion","father","lord","manor","glory"],
+      stats: ["SIZ","DEX","STR","CON","APP"],
+      resources: [
+        {name:"Hit Points",max:15,color:"#880e4f"},
+        {name:"Unconscious",max:5,color:"#9b59b6"},
+        {name:"Armor",max:0,color:"#7f8c8d"},
+        {name:"Glory",max:10000,color:"#f1c40f"}
+      ],
+      tabs:["Core","Skills","Passions","Traits","Family","Notes","Dice"]
+    }
+  },
+  aces_and_eights: {
+    name: "Aces & Eights",
+    icon: "🤠",
+    color: "#795548",
+    category: "Historical",
+    publisher: "Kenzer & Company",
+    desc: "Kenzer & Company — Wild West",
+    fields: {
+      basic: ["occupation","birthplace","age","height","weight","reputation","wanted"],
+      stats: ["STR","DEX","CON","INT","WIS","LK","CHA"],
+      resources: [
+        {name:"HP",max:10,color:"#795548"},
+        {name:"Fame",max:0,color:"#f39c12"},
+        {name:"Notoriety",max:0,color:"#e74c3c"}
+      ],
+      tabs:["Core","Skills","Equipment","Notes","Dice"]
+    }
+  },
+  pirates_and_dragons: {
+    name: "Pirates & Dragons",
+    icon: "🏴‍☠️",
+    color: "#1565c0",
+    category: "Swashbuckling",
+    publisher: "Rogue Games",
+    desc: "Rogue Games",
+    fields: {
+      basic: ["species","career","nationality","ship","rank","wanted_level"],
+      stats: ["STR","DEX","CON","INT","WIS","CHA"],
+      resources: [
+        {name:"HP",max:8,color:"#1565c0"},
+        {name:"Fortune",max:3,color:"#f39c12"}
+      ],
+      tabs:["Core","Skills","Sorcery","Ship","Equipment","Notes","Dice"]
+    }
+  },
+
+  // ── ANIME / MANGA ────────────────────────────────
+  mekton_zeta: {
+    name: "Mekton Zeta",
+    icon: "🤖",
+    color: "#1565c0",
+    category: "Anime / Mecha",
+    publisher: "R. Talsorian Games",
+    desc: "R. Talsorian Games",
+    fields: {
+      basic: ["role","relationship","background","motivation","homeland"],
+      stats: ["INT","REF","TECH","COOL","ATTR","LUCK","MA","BODY","EMP","RUN","LEAP","LIFT"],
+      resources: [
+        {name:"HP",max:30,color:"#1565c0"},
+        {name:"Humanity",max:40,color:"#f39c12"}
+      ],
+      tabs:["Core","Skills","Mech Build","Combat","Notes","Dice"]
+    }
+  },
+  big_eyes_small_mouth: {
+    name: "Big Eyes, Small Mouth 3e",
+    icon: "👁",
+    color: "#e91e63",
+    category: "Anime / Mecha",
+    publisher: "BESM",
+    desc: "White Wolf / Guardians of Order",
+    fields: {
+      basic: ["character_type","template","motivation","wealth_level","age"],
+      stats: ["Body","Mind","Soul"],
+      resources: [
+        {name:"HP",max:50,color:"#e91e63"},
+        {name:"EP",max:50,color:"#3498db"},
+        {name:"Combat Value",max:0,color:"#f39c12"}
+      ],
+      tabs:["Core","Attributes","Skills","Equipment","Notes","Dice"]
+    }
+  },
+  legend_of_five_rings: {
+    name: "Legend of the Five Rings 5e",
+    icon: "🌸",
+    color: "#c0392b",
+    category: "Fantasy",
+    publisher: "Fantasy Flight Games",
+    desc: "Fantasy Flight Games — Rokugan",
+    fields: {
+      basic: ["clan","family","school","giri","ninjo","rank","glory","status","honor"],
+      stats: ["Air","Earth","Fire","Water","Void"],
+      resources: [
+        {name:"Endurance",max:10,color:"#c0392b"},
+        {name:"Composure",max:10,color:"#3498db"},
+        {name:"Focus",max:0,color:"#f1c40f"},
+        {name:"Vigilance",max:0,color:"#27ae60"}
+      ],
+      tabs:["Core","Skills","Techniques","Advantages","Notes","Dice"]
+    }
+  },
+
+  // ── WILD WEST / OTHER LICENSED ───────────────────
+  deadlands_reloaded: {
+    name: "Deadlands: The Weird West",
+    icon: "💀",
+    color: "#5d4037",
+    category: "Historical",
+    publisher: "Pinnacle Entertainment",
+    desc: "Pinnacle Entertainment Group",
+    fields: {
+      basic: ["concept","background","hindrance","edge","wind","pace"],
+      stats: ["Agility","Smarts","Spirit","Strength","Vigor"],
+      resources: [
+        {name:"Wounds",max:3,color:"#5d4037"},
+        {name:"Fatigue",max:2,color:"#795548"},
+        {name:"Power Points",max:10,color:"#9b59b6"}
+      ],
+      tabs:["Core","Skills","Edges","Powers","Equipment","Notes","Dice"]
+    }
+  },
+  savage_worlds: {
+    name: "Savage Worlds Adventure Ed.",
+    icon: "⚔",
+    color: "#e65100",
+    category: "Universal",
+    publisher: "Pinnacle Entertainment",
+    desc: "Pinnacle Entertainment Group",
+    fields: {
+      basic: ["concept","race","rank","experience"],
+      stats: ["Agility","Smarts","Spirit","Strength","Vigor"],
+      resources: [
+        {name:"Wounds",max:3,color:"#e65100"},
+        {name:"Fatigue",max:2,color:"#795548"},
+        {name:"Power Points",max:0,color:"#9b59b6"}
+      ],
+      tabs:["Core","Skills","Edges","Powers","Equipment","Notes","Dice"]
+    }
+  },
+  gurps: {
+    name: "GURPS 4e",
+    icon: "📖",
+    color: "#455a64",
+    category: "Universal",
+    publisher: "Steve Jackson Games",
+    desc: "Steve Jackson Games",
+    fields: {
+      basic: ["concept","total_points","unspent_points","age","height","weight","appearance"],
+      stats: ["ST","DX","IQ","HT"],
+      resources: [
+        {name:"HP",max:10,color:"#455a64"},
+        {name:"FP",max:10,color:"#3498db"},
+        {name:"Will",max:10,color:"#9b59b6"},
+        {name:"Per",max:10,color:"#27ae60"}
+      ],
+      tabs:["Core","Skills","Advantages","Equipment","Notes","Dice"]
+    }
+  },
+  hero_system: {
+    name: "HERO System 6e",
+    icon: "🦸",
+    color: "#1565c0",
+    category: "Universal",
+    publisher: "Hero Games",
+    desc: "Hero Games",
+    fields: {
+      basic: ["concept","total_cost","campaign","genre"],
+      stats: ["STR","DEX","CON","INT","EGO","PRE","OCV","DCV","OMCV","DMCV","SPD","REC","END","STUN"],
+      resources: [
+        {name:"STUN",max:20,color:"#1565c0"},
+        {name:"BODY",max:10,color:"#e74c3c"},
+        {name:"END",max:20,color:"#27ae60"}
+      ],
+      tabs:["Core","Powers","Skills","Perks","Talents","Equipment","Notes","Dice"]
+    }
+  },
+  buffy_rpg: {
+    name: "Buffy / Angel RPG",
+    icon: "🧛",
+    color: "#4a148c",
+    category: "Urban Fantasy",
+    publisher: "Eden Studios",
+    desc: "Eden Studios — Cinematic Unisystem",
+    fields: {
+      basic: ["character_type","archetype","motivation","drawback","quality"],
+      stats: ["STR","DEX","CON","INT","PER","WIL"],
+      resources: [
+        {name:"Life Points",max:26,color:"#4a148c"},
+        {name:"Drama Points",max:10,color:"#f1c40f"},
+        {name:"Endurance",max:26,color:"#27ae60"}
+      ],
+      tabs:["Core","Skills","Qualities","Equipment","Notes","Dice"]
+    }
+  },
+  paranoia: {
+    name: "Paranoia RPG",
+    icon: "🤖",
+    color: "#b71c1c",
+    category: "Sci-Fi",
+    publisher: "Mongoose Publishing",
+    desc: "Mongoose Publishing / Mongoose 2e",
+    fields: {
+      basic: ["full_name","clone_number","sector","clearance","secret_society","mutation"],
+      stats: ["Violence","Brains","Chutzpah","Mechanics"],
+      resources: [
+        {name:"HP",max:10,color:"#b71c1c"},
+        {name:"Clones Remaining",max:5,color:"#f39c12"},
+        {name:"Treason Points",max:0,color:"#e74c3c"}
+      ],
+      tabs:["Core","Skills","Equipment","Treasonous Notes","Dice"]
+    }
+  },
+  runequest: {
+    name: "RuneQuest: Glorantha",
+    icon: "🌀",
+    color: "#bf360c",
+    category: "Fantasy",
+    publisher: "Chaosium",
+    desc: "Chaosium",
+    fields: {
+      basic: ["homeland","culture","cult","rune_affinities","occupation","rank"],
+      stats: ["STR","CON","SIZ","DEX","INT","POW","CHA"],
+      resources: [
+        {name:"Hit Points",max:11,color:"#bf360c"},
+        {name:"Magic Points",max:13,color:"#3498db"},
+        {name:"Rune Points",max:3,color:"#f39c12"},
+        {name:"Spirit Magic",max:0,color:"#9b59b6"}
+      ],
+      tabs:["Core","Skills","Runes","Passions","Equipment","Notes","Dice"]
+    }
+  },
+  call_of_cthulhu_classic: {
+    name: "Call of Cthulhu (Classic)",
+    icon: "🐙",
+    color: "#4a148c",
+    category: "Horror",
+    publisher: "Chaosium",
+    desc: "Chaosium — Classic BRP",
+    fields: {
+      basic: ["occupation","age","sex","birthplace","residence"],
+      stats: ["STR","DEX","CON","INT","SIZ","APP","POW","EDU"],
+      resources: [
+        {name:"HP",max:10,color:"#4a148c"},
+        {name:"Sanity",max:50,color:"#3498db"},
+        {name:"Magic Points",max:10,color:"#9b59b6"}
+      ],
+      tabs:["Core","Skills","Equipment","Notes","Dice"]
+    }
+  },
+  kids_on_bikes: {
+    name: "Kids on Bikes",
+    icon: "🚲",
+    color: "#1976d2",
+    category: "Horror",
+    publisher: "Renegade Game Studios",
+    desc: "Renegade Game Studios",
+    fields: {
+      basic: ["archetype","drive","problem","quirk","adult_character"],
+      stats: ["Fight","Brains","Flight","Charm","Grit","Sneak"],
+      resources: [
+        {name:"Tokens",max:5,color:"#1976d2"},
+        {name:"Fear",max:6,color:"#e74c3c"}
+      ],
+      tabs:["Core","Abilities","Gear","Notes","Dice"]
+    }
+  },
+  sprawl: {
+    name: "The Sprawl",
+    icon: "🌆",
+    color: "#00bcd4",
+    category: "Cyberpunk",
+    publisher: "Ardens Ludere",
+    desc: "Ardens Ludere (PbtA Cyberpunk)",
+    fields: {
+      basic: ["playbook","look","background","corp_relationships"],
+      stats: ["Cool","Edge","Meat","Mind","Style","Synth"],
+      resources: [
+        {name:"Harm",max:4,color:"#00bcd4"},
+        {name:"Clocks",max:5,color:"#f39c12"}
+      ],
+      tabs:["Core","Moves","Gear","Contacts","Notes","Dice"]
+    }
+  },
+  neon_city_overdrive: {
+    name: "Neon City Overdrive",
+    icon: "🌃",
+    color: "#ff00ff",
+    category: "Cyberpunk",
+    publisher: "Nathan Russel",
+    desc: "Nathan Russel",
+    fields: {
+      basic: ["concept","style","flaw","cybernetics","connection"],
+      stats: ["Edge","Grit","Savvy","Smarts"],
+      resources: [
+        {name:"Harm",max:4,color:"#ff00ff"},
+        {name:"Boons",max:3,color:"#00ffff"}
+      ],
+      tabs:["Core","Abilities","Gear","Notes","Dice"]
+    }
+  },
+
+  // ── HASBRO LICENSED PROPERTIES ───────────────────
+  alien_covenant_rpg: {
+    name: "Star Trek Adventures 2e",
+    icon: "🖖",
+    color: "#FFD700",
+    category: "Licensed: Sci-Fi",
+    publisher: "Modiphius Entertainment",
+    desc: "Modiphius Entertainment",
+    fields: {
+      basic: ["species","department","assignment","rank","ship","upbringing","environment"],
+      stats: ["Control","Daring","Fitness","Insight","Presence","Reason"],
+      resources: [
+        {name:"Stress",max:10,color:"#FFD700"},
+        {name:"Determination",max:3,color:"#3498db"},
+        {name:"Shields",max:0,color:"#7f8c8d"}
+      ],
+      tabs:["Core","Disciplines","Values","Equipment","Notes","Dice"]
+    }
+  },
+  doctor_who: {
+    name: "Doctor Who RPG",
+    icon: "🌀",
+    color: "#003b6f",
+    category: "Licensed: Sci-Fi",
+    publisher: "Cubicle 7",
+    desc: "Cubicle 7 — The TARDIS",
+    fields: {
+      basic: ["species","occupation","tech_level","home_era","home_place","motivation"],
+      stats: ["Awareness","Coordination","Ingenuity","Presence","Resolve","Strength"],
+      resources: [
+        {name:"Story Points",max:6,color:"#003b6f"},
+        {name:"Hope",max:3,color:"#f1c40f"}
+      ],
+      tabs:["Core","Skills","Traits","Equipment","Notes","Dice"]
+    }
+  },
+  conan_rpg: {
+    name: "Conan: Adventures in an Age Undreamed Of",
+    icon: "⚔",
+    color: "#8d6e63",
+    category: "Fantasy",
+    publisher: "Modiphius Entertainment",
+    desc: "Modiphius Entertainment — 2d20",
+    fields: {
+      basic: ["homeland","caste","archetype","nature","war_story","patron_deity"],
+      stats: ["Agility","Awareness","Brawn","Coordination","Intelligence","Personality","Willpower"],
+      resources: [
+        {name:"Vigor",max:10,color:"#8d6e63"},
+        {name:"Resolve",max:10,color:"#3498db"},
+        {name:"Fortune",max:3,color:"#f39c12"},
+        {name:"Doom",max:0,color:"#9b59b6"}
+      ],
+      tabs:["Core","Skills","Talents","Equipment","Notes","Dice"]
+    }
+  },
+  dune_rpg: {
+    name: "Dune: Adventures in the Imperium",
+    icon: "🏜",
+    color: "#e65100",
+    category: "Licensed: Sci-Fi",
+    publisher: "Modiphius Entertainment",
+    desc: "Modiphius Entertainment — 2d20",
+    fields: {
+      basic: ["house","role","drive","focus","statement","talent"],
+      stats: ["Body","Mind","Skills","Status"],
+      resources: [
+        {name:"Vigor",max:10,color:"#e65100"},
+        {name:"Resolve",max:10,color:"#3498db"},
+        {name:"Momentum",max:5,color:"#f39c12"},
+        {name:"Threat",max:0,color:"#9b59b6"}
+      ],
+      tabs:["Core","Skills","Traits","Equipment","Notes","Dice"]
+    }
+  },
+  fallout_rpg: {
+    name: "Fallout: The RPG",
+    icon: "☢",
+    color: "#ffd700",
+    category: "Licensed: Sci-Fi",
+    publisher: "Modiphius Entertainment",
+    desc: "Modiphius Entertainment",
+    fields: {
+      basic: ["origin","trait","karma","level","vault_number","faction"],
+      stats: ["STR","PER","END","CHA","INT","AGL","LCK"],
+      resources: [
+        {name:"HP",max:20,color:"#ffd700"},
+        {name:"AP",max:10,color:"#00bcd4"},
+        {name:"Rads",max:0,color:"#27ae60"}
+      ],
+      tabs:["Core","Skills","Perks","Equipment","Notes","Dice"]
+    }
+  },
+
+  // ── PULP / ADVENTURE ─────────────────────────────
+  spirit_of_century: {
+    name: "Spirit of the Century",
+    icon: "🎩",
+    color: "#795548",
+    category: "Pulp",
+    publisher: "Evil Hat Productions",
+    desc: "Evil Hat Productions (FATE)",
+    fields: {
+      basic: ["high_concept","trouble","phase1","phase2","phase3"],
+      stats: [],
+      resources: [
+        {name:"Fate Points",max:5,color:"#795548"},
+        {name:"Stress",max:4,color:"#e74c3c"}
+      ],
+      tabs:["Core","Skills","Stunts","Aspects","Notes","Dice"]
+    }
+  },
+  call_of_cthulhu_pulp: {
+    name: "Pulp Cthulhu",
+    icon: "🎩",
+    color: "#6a1b9a",
+    category: "Pulp",
+    publisher: "Chaosium",
+    desc: "Chaosium — Pulp Action CoC",
+    fields: {
+      basic: ["occupation","archetype","pulp_talents","age","birthplace","era"],
+      stats: ["STR","DEX","CON","INT","SIZ","APP","POW","EDU","LCK"],
+      resources: [
+        {name:"HP",max:10,color:"#6a1b9a"},
+        {name:"Sanity",max:50,color:"#3498db"},
+        {name:"Magic Points",max:10,color:"#9b59b6"},
+        {name:"Luck",max:50,color:"#f39c12"}
+      ],
+      tabs:["Core","Skills","Talents","Equipment","Notes","Dice"]
+    }
+  }
+};
+
+// ============================================================
+// APPLICATION STATE
+// ============================================================
+let characters = {};
+let activeCharId = null;
+let aiPanelOpen = false;
+let aiHistory = [];
+let autosaveTimer = null;
+
+// Load from localStorage
+function loadState() {
+  try {
+    const saved = localStorage.getItem('characterForge_v2');
+    if (saved) characters = JSON.parse(saved);
+  } catch(e) { characters = {}; }
+}
+
+function saveState() {
+  clearTimeout(autosaveTimer);
+  autosaveTimer = setTimeout(() => {
+    try {
+      localStorage.setItem('characterForge_v2', JSON.stringify(characters));
+    } catch(e) {}
+  }, 500);
+}
+
+function notify(msg) {
+  const el = document.getElementById('notification');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2500);
+}
+
+// ============================================================
+// SIDEBAR SORTING
+// ============================================================
+let sidebarSortMode = 'category';
+let collapsedCats = new Set();
+
+function setSortMode(mode) {
+  sidebarSortMode = mode;
+  document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('sort-' + (mode==='category'?'cat':mode==='alpha'?'az':mode==='chars'?'chars':'pub'))?.classList.add('active');
+  renderSidebar();
+}
+
+function toggleCategory(cat) {
+  if (collapsedCats.has(cat)) collapsedCats.delete(cat);
+  else collapsedCats.add(cat);
+  renderSidebar();
+}
+
+function renderSidebar() {
+  const gameListEl = document.getElementById('game-list');
+  const charCounts = {};
+  Object.values(characters).forEach(c => { charCounts[c.gameId] = (charCounts[c.gameId] || 0) + 1; });
+  const query = (document.getElementById('sidebar-search')?.value || '').toLowerCase().trim();
+  let allGames = Object.entries(GAME_SYSTEMS);
+  if (query) allGames = allGames.filter(([k,g]) => g.name.toLowerCase().includes(query) || g.category.toLowerCase().includes(query) || (g.publisher||'').toLowerCase().includes(query));
+
+  if (sidebarSortMode === 'alpha') {
+    allGames.sort(([,a],[,b]) => a.name.localeCompare(b.name));
+    gameListEl.innerHTML = '<div class="cat-items">' + allGames.map(([gid,g]) => renderGameItem(gid,g,charCounts)).join('') + '</div>';
+    return;
+  }
+  if (sidebarSortMode === 'chars') {
+    allGames.sort(([a],[b]) => (charCounts[b]||0) - (charCounts[a]||0));
+    gameListEl.innerHTML = '<div class="cat-items">' + allGames.map(([gid,g]) => renderGameItem(gid,g,charCounts)).join('') + '</div>';
+    return;
+  }
+
+  // Group by category or publisher
+  const groupKey = sidebarSortMode === 'publisher' ? 'publisher' : 'category';
+  const groups = {};
+  allGames.forEach(([gid,g]) => {
+    const key = g[groupKey] || 'Other';
+    if (!groups[key]) groups[key] = [];
+    groups[key].push([gid,g]);
+  });
+  const sortedGroups = Object.entries(groups).sort(([a],[b]) => a.localeCompare(b));
+  gameListEl.innerHTML = sortedGroups.map(([cat, items]) => {
+    const collapsed = collapsedCats.has(cat);
+    const catCharCount = items.reduce((s,[gid]) => s + (charCounts[gid]||0), 0);
+    return `<div class="cat-header ${collapsed?'collapsed':''}" onclick="toggleCategory('${cat.replace(/'/g,"\\'")}')" >
+        <span>${cat}</span>
+        <span style="display:flex;align-items:center;gap:0.4rem">
+          ${catCharCount > 0 ? `<span style="background:rgba(200,168,75,0.15);color:var(--accent);padding:0 5px;border-radius:3px;font-size:0.6rem">${catCharCount}</span>` : ''}
+          <span class="cat-chevron">▾</span>
+        </span>
+      </div>
+      <div class="cat-items">
+        ${items.map(([gid,g]) => renderGameItem(gid,g,charCounts)).join('')}
+      </div>`;
+  }).join('');
+}
+
+function renderGameItem(gid, g, charCounts) {
+  const count = charCounts[gid] || 0;
+  const isActive = activeCharId && characters[activeCharId]?.gameId === gid;
+  return `<div class="game-item ${isActive?'active':''}" onclick="selectGame('${gid}')">
+    <span style="color:${g.color};font-size:0.95rem;flex-shrink:0">${g.icon}</span>
+    <span class="game-name" style="font-size:0.8rem">${g.name}</span>
+    ${count > 0 ? `<span class="game-count">${count}</span>` : ''}
+  </div>`;
+}
+
+function selectGame(gid) {
+  const section = document.getElementById('char-list-section');
+  section.style.display = 'block';
+  const charListEl = document.getElementById('char-list');
+  const chars = Object.entries(characters).filter(([,c]) => c.gameId === gid);
+  charListEl.innerHTML = chars.length === 0
+    ? `<div class="empty-state" style="padding:1rem"><div class="empty-state-icon" style="font-size:1.5rem">${GAME_SYSTEMS[gid].icon}</div><div class="empty-state-text">No characters yet</div></div>`
+    : chars.map(([id, c]) => `<div class="char-item ${activeCharId===id?'active':''}" onclick="loadCharacter('${id}')">
+        <div class="char-avatar">${GAME_SYSTEMS[gid].icon}</div>
+        <div class="char-info">
+          <div class="char-name">${c.name || 'Unnamed'}</div>
+          <div class="char-meta">${c.data?.class || c.data?.clan || c.data?.occupation || c.data?.playbook || c.data?.career || gid}</div>
+        </div>
+      </div>`).join('');
+}
+
+// ============================================================
+// SCREEN MANAGEMENT
+// ============================================================
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(`screen-${name}`)?.classList.add('active');
+  if (name === 'welcome') {
+    activeCharId = null;
+    renderWelcome();
+    renderSidebar();
+  }
+}
+
+function renderWelcome() {
+  const total = Object.keys(characters).length;
+  const systems = new Set(Object.values(characters).map(c => c.gameId)).size;
+  const allGames = Object.entries(GAME_SYSTEMS);
+  // Group by category
+  const groups = {};
+  allGames.forEach(([gid,g]) => {
+    const cat = g.category || 'Other';
+    if (!groups[cat]) groups[cat] = [];
+    groups[cat].push([gid,g]);
+  });
+  const sortedGroups = Object.entries(groups).sort(([a],[b]) => a.localeCompare(b));
+  document.getElementById('screen-welcome').innerHTML = `
+    <div class="welcome">
+      <div class="welcome-rune">⚔</div>
+      <h1>CHARACTER FORGE</h1>
+      <p>Create, manage, and chronicle your characters across ${allGames.length}+ tabletop RPG systems. Powered by an AI Lore Keeper for instant guidance.</p>
+      <div class="welcome-stats">
+        <div class="welcome-stat"><div class="welcome-stat-num">${total}</div><div class="welcome-stat-label">Characters</div></div>
+        <div class="welcome-stat"><div class="welcome-stat-num">${allGames.length}</div><div class="welcome-stat-label">Systems</div></div>
+        <div class="welcome-stat"><div class="welcome-stat-num">${systems}</div><div class="welcome-stat-label">Active Games</div></div>
+      </div>
+      <div style="width:100%;max-width:900px;text-align:left">
+        ${sortedGroups.map(([cat, items]) => `
+          <div style="margin-bottom:1.5rem">
+            <div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;letter-spacing:0.2em;color:var(--text-dim);text-transform:uppercase;margin-bottom:0.7rem;padding-bottom:0.3rem;border-bottom:1px solid var(--border)">${cat}</div>
+            <div style="display:flex;flex-wrap:wrap;gap:0.6rem">
+              ${items.map(([gid,g]) => `<div class="game-card" onclick="openNewCharModalForGame('${gid}')" style="min-width:120px;max-width:160px;flex:1">
+                <div class="game-card-icon">${g.icon}</div>
+                <div class="game-card-name" style="font-size:0.68rem">${g.name}</div>
+              </div>`).join('')}
+            </div>
+          </div>`).join('')}
+      </div>
+    </div>`;
+}
+
+// ============================================================
+// NEW CHARACTER MODAL
+// ============================================================
+function openNewCharModal(preselect) {
+  const sel = document.getElementById('nc-game');
+  // Group by category
+  const groups = {};
+  Object.entries(GAME_SYSTEMS).forEach(([k,g]) => {
+    const cat = g.category || 'Other';
+    if (!groups[cat]) groups[cat] = [];
+    groups[cat].push([k,g]);
+  });
+  sel.innerHTML = Object.entries(groups).sort(([a],[b])=>a.localeCompare(b)).map(([cat,items]) =>
+    `<optgroup label="${cat}">${items.map(([k,g])=>`<option value="${k}">${g.icon} ${g.name}</option>`).join('')}</optgroup>`
+  ).join('');
+  if (preselect) sel.value = preselect;
+  sel.onchange = () => renderNCSystemFields(sel.value);
+  renderNCSystemFields(sel.value);
+  document.getElementById('nc-name').value = '';
+  openModal('new-char-modal');
+}
+
+function openNewCharModalForGame(gid) {
+  openNewCharModal(gid);
+}
+
+function renderNCSystemFields(gid) {
+  const g = GAME_SYSTEMS[gid];
+  if (!g) return;
+  const fields = g.fields.basic.slice(0, 3);
+  document.getElementById('nc-system-fields').innerHTML = fields.map(f => `
+    <div class="form-group" style="margin-bottom:0.7rem">
+      <label>${f.replace(/_/g,' ')}</label>
+      <input type="text" id="nc-${f}" placeholder="${f.replace(/_/g,' ')}..." />
+    </div>`).join('');
+}
+
+function createCharacter() {
+  const name = document.getElementById('nc-name').value.trim();
+  const gid = document.getElementById('nc-game').value;
+  if (!name) { notify('Please enter a character name.'); return; }
+  const g = GAME_SYSTEMS[gid];
+  const id = 'char_' + Date.now() + '_' + Math.random().toString(36).slice(2,6);
+  const data = {};
+  g.fields.basic.slice(0,3).forEach(f => {
+    const el = document.getElementById('nc-' + f);
+    if (el) data[f] = el.value;
+  });
+  // Init resources
+  const resources = {};
+  (g.fields.resources || []).forEach(r => {
+    resources[r.name] = { current: r.max, max: r.max };
+  });
+  // Init stats
+  const stats = {};
+  (g.fields.stats || []).forEach(s => { stats[s] = 10; });
+  characters[id] = { id, name, gameId: gid, data, stats, resources, traits: [], skills: {}, notes: '', equipment: [], features: [], spells: [], created: Date.now() };
+  saveState();
+  closeModal('new-char-modal');
+  renderSidebar();
+  loadCharacter(id);
+  notify(`✦ ${name} created!`);
+}
+
+// ============================================================
+// CHARACTER SHEET RENDERING
+// ============================================================
+function loadCharacter(id) {
+  activeCharId = id;
+  const char = characters[id];
+  if (!char) return;
+  renderSidebar();
+  selectGame(char.gameId);
+  const g = GAME_SYSTEMS[char.gameId];
+  showScreen('character');
+  const el = document.getElementById('screen-character');
+  el.className = `screen active game-${char.gameId.replace(/[^a-z]/g,'').slice(0,3)}`;
+  el.innerHTML = buildCharacterSheet(char, g);
+  initSheetInteractivity(char, g);
+}
+
+function buildCharacterSheet(char, g) {
+  const tabs = g.fields.tabs || ['Core','Notes','Dice'];
+  return `
+    <div class="sheet-header">
+      <div class="sheet-avatar" onclick="randomizeAvatar('${char.id}')" data-tip="Click to randomize icon">${char.avatar || g.icon}</div>
+      <div class="sheet-title-area">
+        <div class="sheet-game-tag" style="color:${g.color}">${g.icon} ${g.name}</div>
+        <div class="sheet-char-name">
+          <input type="text" value="${char.name}" onchange="updateCharField('${char.id}','name',this.value)"
+            style="background:none;border:none;font-family:'Cinzel',serif;font-size:2rem;color:var(--text-primary);width:100%;outline:none;padding:0" />
+        </div>
+        <div class="sheet-char-subtitle">
+          ${g.fields.basic.slice(0,2).map(f => char.data[f] ? `<span style="margin-right:0.8rem">${char.data[f]}</span>` : '').join('')}
+        </div>
+      </div>
+      <div class="sheet-actions">
+        <button class="btn-sheet" onclick="duplicateCharacter('${char.id}')">Duplicate</button>
+        <button class="btn-sheet primary" onclick="exportCharacter('${char.id}')">Export</button>
+        <button class="btn-sheet danger" onclick="deleteCharacter('${char.id}')">Delete</button>
+      </div>
+    </div>
+    <div class="tabs">
+      ${tabs.map((t,i) => `<button class="tab-btn ${i===0?'active':''}" onclick="switchTab(this,'tab-${slugify(t)}')">${t}</button>`).join('')}
+    </div>
+    ${tabs.map((t,i) => `<div class="tab-panel ${i===0?'active':''}" id="tab-${slugify(t)}">${buildTabContent(char, g, t)}</div>`).join('')}
+  `;
+}
+
+function slugify(s) { return s.toLowerCase().replace(/[^a-z0-9]/g,'_'); }
+
+function switchTab(btn, panelId) {
+  btn.closest('.content-area').querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  btn.closest('.content-area').querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById(panelId)?.classList.add('active');
+}
+
+function buildTabContent(char, g, tab) {
+  // Special handling per game/tab
+  if (tab === 'Dice') return buildDicePanel(char, g);
+  if (tab === 'Notes') return buildNotesPanel(char);
+  if (tab === 'Core') return buildCorePanel(char, g);
+  if (tab === 'Skills') return buildSkillsPanel(char, g);
+  if (tab === 'Equipment' || tab === 'Gear') return buildEquipmentPanel(char, g);
+  if (tab === 'Features' || tab === 'Feats') return buildFeaturesPanel(char, g);
+  if (tab === 'Spells') return buildSpellsPanel(char, g);
+  if (tab === 'Themes') return buildThemesPanel(char, g); // City of Mist
+  if (tab === 'Moves') return buildMovesPanel(char, g);
+  if (tab === 'Disciplines') return buildDisciplinesPanel(char, g);
+  if (tab === 'Backstory' || tab === 'Backstory') return buildBackstoryPanel(char, g);
+  if (tab === 'Bonds') return buildBondsPanel(char, g);
+  if (tab === 'Disorders') return buildDisordersPanel(char, g);
+  if (tab === 'Advantages') return buildAdvantagesPanel(char, g);
+  if (tab === 'Sorcery') return buildSorceryPanel(char, g);
+  if (tab === 'Cards') return buildCardsPanel(char, g);
+  if (tab === 'Powers') return buildPowersPanel(char, g);
+  if (tab === 'Qualities') return buildQualitiesPanel(char, g);
+  if (tab === 'Status') return buildStatusPanel(char, g);
+  if (tab === 'Augments') return buildAugmentsPanel(char, g);
+  if (tab === 'Actions') return buildActionsPanel(char, g);
+  if (tab === 'Training') return buildTrainingPanel(char, g);
+  if (tab === 'Anomalies') return buildAnomaliesPanel(char, g);
+  if (tab === 'Rites') return buildRitesPanel(char, g);
+  if (tab === 'Gifts') return buildGiftsPanel(char, g);
+  if (tab === 'Spheres') return buildSpheresPanel(char, g);
+  if (tab === 'Contracts') return buildContractsPanel(char, g);
+  if (tab === 'Talents') return buildTalentsPanel(char, g);
+  if (tab === 'Crew') return buildCrewPanel(char, g);
+  if (tab === 'Pack') return buildPackPanel(char, g);
+  if (tab === 'Team') return buildTeamPanel(char, g);
+  if (tab === 'Hx') return buildHxPanel(char, g);
+  if (tab === 'Aspects') return buildAspectsPanel(char, g);
+  if (tab === 'Stunts') return buildStuntsPanel(char, g);
+  if (tab === 'Extras') return buildExtrasPanel(char, g);
+  if (tab === 'Labels') return buildLabelsPanel(char, g);
+  if (tab === 'Perks') return buildPerksPanel(char, g);
+  if (tab === 'Cell') return buildCellPanel(char, g);
+  if (tab === 'Force Powers') return buildForcePowersPanel(char, g);
+  if (tab === 'Merits') return buildMeritsPanel(char, g);
+  if (tab === 'Edges') return buildEdgesPanel(char, g);
+  if (tab === 'Reputation') return buildReputationPanel(char, g);
+  if (tab === 'Conditions') return buildConditionsPanel(char, g);
+  if (tab === 'Experiences') return buildExperiencesPanel(char, g);
+  if (tab === 'Backgrounds') return buildBackgroundsPanel(char, g);
+  if (tab === 'Agenda') return buildAgendaPanel(char, g);
+  if (tab === 'Contacts') return buildContactsPanel(char, g);
+  if (tab === 'Programs') return buildProgramsPanel(char, g);
+  return buildGenericPanel(char, g, tab);
+}
+
+// ---- CORE PANEL ----
+function buildCorePanel(char, g) {
+  const hasStats = g.fields.stats && g.fields.stats.length > 0;
+  const hasResources = g.fields.resources && g.fields.resources.length > 0;
+  return `
+    <div class="section-card">
+      <div class="section-card-title">Identity</div>
+      <div class="form-grid">
+        ${g.fields.basic.map(f => `
+          <div class="form-group">
+            <label>${f.replace(/_/g,' ')}</label>
+            <input type="text" value="${char.data[f]||''}" onchange="updateNestedField('${char.id}','data','${f}',this.value)" placeholder="${f.replace(/_/g,' ')}..." />
+          </div>`).join('')}
+      </div>
+    </div>
+    ${hasStats ? `
+    <div class="section-card">
+      <div class="section-card-title">${g.gameId === 'coc7' || g.gameId === 'dg' ? 'Characteristics' : 'Attributes'}</div>
+      <div class="stat-grid">
+        ${g.fields.stats.map(s => buildStatBox(char, s)).join('')}
+      </div>
+    </div>` : ''}
+    ${hasResources ? `
+    <div class="section-card">
+      <div class="section-card-title">Resources & Vitals</div>
+      ${g.fields.resources.map(r => buildResourceRow(char, r)).join('')}
+    </div>` : ''}
+    <div class="section-card">
+      <div class="section-card-title">Traits & Tags</div>
+      <div class="trait-list" id="trait-list-${char.id}">
+        ${(char.traits||[]).map((t,i) => `<span class="trait-pill">${t}<span class="remove-btn" onclick="removeTrait('${char.id}',${i})">✕</span></span>`).join('')}
+      </div>
+      <div class="add-trait-row">
+        <input type="text" class="add-trait-input" id="trait-input-${char.id}" placeholder="Add a trait..." onkeydown="if(event.key==='Enter')addTrait('${char.id}')" />
+        <button class="btn-add" onclick="addTrait('${char.id}')">+ Add</button>
+      </div>
+    </div>
+  `;
+}
+
+function buildStatBox(char, stat) {
+  const val = (char.stats||{})[stat] || 10;
+  const mod = Math.floor((val - 10) / 2);
+  const modStr = mod >= 0 ? `+${mod}` : `${mod}`;
+  return `<div class="stat-box">
+    <div class="stat-label">${stat}</div>
+    <input class="stat-input" type="number" value="${val}" min="1" max="30"
+      onchange="updateNestedField('${char.id}','stats','${stat}',+this.value);this.closest('.stat-box').querySelector('.stat-mod').textContent=((+this.value-10>=0?'+':'')+Math.floor((+this.value-10)/2))" />
+    <div class="stat-mod">${modStr}</div>
+  </div>`;
+}
+
+function buildResourceRow(char, r) {
+  const res = (char.resources||{})[r.name] || {current: r.max, max: r.max};
+  const pct = res.max > 0 ? Math.max(0, Math.min(100, (res.current/res.max)*100)) : 0;
+  return `<div class="resource-row">
+    <div class="resource-label-row">
+      <span class="resource-label">${r.name}</span>
+      <span class="resource-val">${res.current} / ${res.max}</span>
+    </div>
+    <div class="resource-bar-outer" onclick="adjustResource('${char.id}','${r.name}',event)">
+      <div class="resource-bar-inner" style="width:${pct}%;background:${r.color}"></div>
+    </div>
+    <div class="resource-inputs">
+      <button onclick="deltaResource('${char.id}','${r.name}',-1)" style="background:none;border:1px solid var(--border);color:var(--text-secondary);width:26px;height:26px;border-radius:4px;cursor:pointer;font-size:0.9rem">−</button>
+      <input type="number" value="${res.current}" style="width:55px" onchange="setResource('${char.id}','${r.name}',+this.value)" />
+      <button onclick="deltaResource('${char.id}','${r.name}',1)" style="background:none;border:1px solid var(--border);color:var(--text-secondary);width:26px;height:26px;border-radius:4px;cursor:pointer;font-size:0.9rem">+</button>
+      <span style="color:var(--text-dim);font-size:0.8rem">/ Max:</span>
+      <input type="number" value="${res.max}" style="width:55px" onchange="setResourceMax('${char.id}','${r.name}',+this.value)" />
+    </div>
+  </div>`;
+}
+
+// ---- SKILLS PANEL ----
+function buildSkillsPanel(char, g) {
+  const skillSets = getSkillsForGame(g.gameId ? g.gameId : Object.keys(GAME_SYSTEMS).find(k=>GAME_SYSTEMS[k]===g));
+  const gid = Object.keys(GAME_SYSTEMS).find(k=>GAME_SYSTEMS[k]===g) || '';
+  return `<div class="section-card">
+    <div class="section-card-title">Skills</div>
+    <div style="columns:3;gap:1rem">
+      ${skillSets.map(s => {
+        const val = (char.skills||{})[s] || (gid === 'coc7' ? 0 : gid === 'dg' ? 0 : 0);
+        return `<div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.4rem;break-inside:avoid">
+          <input type="number" value="${val}" min="0" max="${gid==='coc7'?99:gid==='sr6'?12:5}"
+            style="width:48px;text-align:center"
+            onchange="updateNestedField('${char.id}','skills','${s}',+this.value)" />
+          <span style="font-size:0.88rem;color:var(--text-secondary)">${s}</span>
+        </div>`;
+      }).join('')}
+    </div>
+    <div class="add-trait-row" style="margin-top:0.8rem">
+      <input type="text" id="custom-skill-${char.id}" placeholder="Custom skill..." />
+      <button class="btn-add" onclick="addCustomSkill('${char.id}')">+ Add</button>
+    </div>
+  </div>`;
+}
+
+// ---- EQUIPMENT PANEL ----
+function buildEquipmentPanel(char, g) {
+  return `<div class="section-card">
+    <div class="section-card-title">Equipment & Inventory</div>
+    <div id="equip-list-${char.id}">
+      ${(char.equipment||[]).map((e,i) => `
+        <div style="display:flex;gap:0.5rem;margin-bottom:0.5rem;align-items:center">
+          <input type="text" value="${e.name||''}" placeholder="Item name" style="flex:2" onchange="updateEquipItem('${char.id}',${i},'name',this.value)" />
+          <input type="text" value="${e.qty||1}" placeholder="Qty" style="width:50px;text-align:center" onchange="updateEquipItem('${char.id}',${i},'qty',this.value)" />
+          <input type="text" value="${e.notes||''}" placeholder="Notes" style="flex:3" onchange="updateEquipItem('${char.id}',${i},'notes',this.value)" />
+          <button onclick="removeEquipItem('${char.id}',${i})" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:1rem;padding:0.2rem">✕</button>
+        </div>`).join('')}
+    </div>
+    <button class="btn-add" style="margin-top:0.5rem" onclick="addEquipItem('${char.id}')">+ Add Item</button>
+  </div>
+  <div class="section-card">
+    <div class="section-card-title">Currency / Wealth</div>
+    <div class="form-grid">
+      <div class="form-group"><label>Gold / Nuyen / Credits</label><input type="text" value="${char.currency||''}" onchange="updateCharField('${char.id}','currency',this.value)" /></div>
+      <div class="form-group"><label>Encumbrance / Carry</label><input type="text" value="${char.encumbrance||''}" onchange="updateCharField('${char.id}','encumbrance',this.value)" /></div>
+    </div>
+  </div>`;
+}
+
+// ---- FEATURES PANEL ----
+function buildFeaturesPanel(char, g) {
+  return `<div class="section-card">
+    <div class="section-card-title">Class Features, Feats & Abilities</div>
+    <div id="feat-list-${char.id}">
+      ${(char.features||[]).map((f,i) => `
+        <div style="margin-bottom:0.8rem;background:var(--bg-card2);border:1px solid var(--border);border-radius:6px;padding:0.8rem">
+          <div style="display:flex;gap:0.5rem;margin-bottom:0.5rem">
+            <input type="text" value="${f.name||''}" placeholder="Feature name" style="flex:1;font-weight:600" onchange="updateFeature('${char.id}',${i},'name',this.value)" />
+            <input type="text" value="${f.source||''}" placeholder="Source/Level" style="width:120px" onchange="updateFeature('${char.id}',${i},'source',this.value)" />
+            <button onclick="removeFeature('${char.id}',${i})" style="background:none;border:none;color:var(--red);cursor:pointer">✕</button>
+          </div>
+          <textarea placeholder="Description..." style="width:100%;min-height:60px" onchange="updateFeature('${char.id}',${i},'desc',this.value)">${f.desc||''}</textarea>
+        </div>`).join('')}
+    </div>
+    <button class="btn-add" onclick="addFeature('${char.id}')">+ Add Feature</button>
+  </div>`;
+}
+
+// ---- SPELLS PANEL ----
+function buildSpellsPanel(char, g) {
+  const levels = ['Cantrips','Level 1','Level 2','Level 3','Level 4','Level 5','Level 6','Level 7','Level 8','Level 9'];
+  return `<div class="section-card">
+    <div class="section-card-title">Spellbook</div>
+    ${levels.map(lv => `
+    <div style="margin-bottom:1rem">
+      <div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.4rem">${lv}</div>
+      <div id="spells-${slugify(lv)}-${char.id}" style="display:flex;flex-wrap:wrap;gap:0.4rem">
+        ${((char.spells||{})[lv]||[]).map((s,i) => `
+          <span style="background:var(--bg-card2);border:1px solid var(--border);border-radius:20px;padding:0.2rem 0.7rem;font-size:0.82rem;display:flex;align-items:center;gap:0.3rem">
+            ${s}<span style="cursor:pointer;color:var(--text-dim)" onclick="removeSpell('${char.id}','${lv}',${i})">✕</span>
+          </span>`).join('')}
+        <input type="text" placeholder="Add spell..." style="border:1px dashed var(--border);border-radius:20px;padding:0.2rem 0.7rem;font-size:0.82rem;min-width:120px;background:none;color:var(--text-primary);outline:none"
+          onkeydown="if(event.key==='Enter'&&this.value){addSpell('${char.id}','${lv}',this.value);this.value=''}" />
+      </div>
+    </div>`).join('')}
+  </div>`;
+}
+
+// ---- NOTES PANEL ----
+function buildNotesPanel(char) {
+  return `<div class="section-card">
+    <div class="section-card-title">Notes & Journal</div>
+    <textarea style="width:100%;min-height:300px;font-size:0.95rem;line-height:1.7" placeholder="Character notes, backstory, campaign journal..." onchange="updateCharField('${char.id}','notes',this.value)">${char.notes||''}</textarea>
+  </div>
+  <div class="section-card">
+    <div class="section-card-title">Appearance & Description</div>
+    <textarea style="width:100%;min-height:100px" placeholder="Physical description, distinguishing features..." onchange="updateCharField('${char.id}','appearance',this.value)">${char.appearance||''}</textarea>
+  </div>`;
+}
+
+// ---- DICE PANEL ----
+function buildDicePanel(char, g) {
+  const gid = Object.keys(GAME_SYSTEMS).find(k=>GAME_SYSTEMS[k]===g)||'';
+  return `<div class="section-card">
+    <div class="section-card-title">Dice Roller</div>
+    <div class="dice-area">
+      ${['d4','d6','d8','d10','d12','d20','d100'].map(d => `
+        <button class="dice-btn" onclick="rollDie('${char.id}','${d}')">
+          <span class="dice-icon">${getDiceIcon(d)}</span>
+          <span style="font-size:0.65rem;font-family:'Share Tech Mono',monospace">${d}</span>
+        </button>`).join('')}
+      <div style="display:flex;flex-direction:column;gap:4px;justify-content:center">
+        <div style="display:flex;gap:4px;align-items:center">
+          <input type="number" id="dice-count-${char.id}" value="1" min="1" max="20" style="width:45px;text-align:center" />
+          <span style="color:var(--text-dim);font-size:0.8rem">×</span>
+          <input type="number" id="dice-sides-${char.id}" value="6" min="2" max="100" style="width:45px;text-align:center" />
+          <button class="btn-add" onclick="rollCustom('${char.id}')">Roll</button>
+        </div>
+        <div style="display:flex;gap:4px;align-items:center">
+          <span style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--text-dim)">MOD</span>
+          <input type="number" id="dice-mod-${char.id}" value="0" style="width:45px;text-align:center" />
+        </div>
+      </div>
+      <div class="dice-result" id="dice-result-${char.id}">—</div>
+    </div>
+    <div class="dice-history" id="dice-history-${char.id}" style="margin-top:0.6rem;max-height:120px;overflow-y:auto;padding:0.4rem;background:var(--bg-card2);border-radius:4px;border:1px solid var(--border)"></div>
+    ${gid === 'fate_core' ? buildFateDice(char) : ''}
+    ${gid === 'city_of_mist' ? buildCityOfMistDice(char) : ''}
+    ${gid === 'blades' ? buildBladesDice(char) : ''}
+    ${gid === 'pbta_generic' ? buildPbtaDice(char) : ''}
+  </div>`;
+}
+
+function getDiceIcon(d) {
+  return {d4:'△',d6:'□',d8:'◇',d10:'○',d12:'⬡',d20:'⬟',d100:'⊕'}[d]||'◉';
+}
+
+function buildFateDice(char) {
+  return `<div class="section-card" style="margin-top:1rem">
+    <div class="section-card-title">FATE Dice (4dF)</div>
+    <button class="btn-primary" onclick="rollFate('${char.id}')">Roll 4dF</button>
+    <div id="fate-result-${char.id}" style="font-family:'Cinzel',serif;font-size:1.5rem;color:var(--accent);margin-top:0.5rem"></div>
+  </div>`;
+}
+
+function buildCityOfMistDice(char) {
+  return `<div class="section-card" style="margin-top:1rem">
+    <div class="section-card-title">City of Mist Move Roll (2d6)</div>
+    <button class="btn-primary" onclick="rollCoM('${char.id}')">Roll Move</button>
+    <div id="com-result-${char.id}" style="font-family:'Cinzel',serif;font-size:1rem;color:var(--accent);margin-top:0.5rem"></div>
+  </div>`;
+}
+
+function buildBladesDice(char) {
+  return `<div class="section-card" style="margin-top:1rem">
+    <div class="section-card-title">Blades Dice Pool</div>
+    <div style="display:flex;gap:0.5rem;align-items:center;margin-bottom:0.5rem">
+      <label>Pool size:</label>
+      <input type="number" id="blades-pool-${char.id}" value="2" min="1" max="6" style="width:45px;text-align:center" />
+      <button class="btn-primary" onclick="rollBlades('${char.id}')">Roll</button>
+    </div>
+    <div id="blades-result-${char.id}" style="font-family:'Cinzel',serif;font-size:1rem;color:var(--accent)"></div>
+  </div>`;
+}
+
+function buildPbtaDice(char) {
+  return `<div class="section-card" style="margin-top:1rem">
+    <div class="section-card-title">PbtA Move Roll (2d6+stat)</div>
+    <div style="display:flex;gap:0.5rem;align-items:center;margin-bottom:0.5rem">
+      <label>Stat bonus:</label>
+      <input type="number" id="pbta-mod-${char.id}" value="0" min="-3" max="4" style="width:45px;text-align:center" />
+      <button class="btn-primary" onclick="rollPbtA('${char.id}')">Roll</button>
+    </div>
+    <div id="pbta-result-${char.id}" style="font-family:'Cinzel',serif;font-size:1rem;color:var(--accent)"></div>
+  </div>`;
+}
+
+// ---- CITY OF MIST THEMES PANEL ----
+function buildThemesPanel(char, g) {
+  char.themes = char.themes || [];
+  return `<div class="section-card">
+    <div class="section-card-title">Themes (Mythos &amp; Logos)</div>
+    <p style="font-size:0.85rem;color:var(--text-secondary);margin-bottom:1rem">City of Mist characters are built from 4 Themes — each representing a part of your Mythos or Logos. Each Theme has a Title, Mystery or Identity, Power Tags, and Weakness Tags.</p>
+    <div id="themes-container-${char.id}">
+      ${char.themes.map((t,i) => buildThemeCard(char.id, t, i)).join('')}
+    </div>
+    ${char.themes.length < 4 ? `
+    <div style="display:flex;gap:0.5rem;margin-top:0.8rem">
+      <button class="btn-add" onclick="addTheme('${char.id}','Mythos')">+ Mythos Theme</button>
+      <button class="btn-add" onclick="addTheme('${char.id}','Logos')">+ Logos Theme</button>
+    </div>` : ''}
+  </div>`;
+}
+
+function buildThemeCard(charId, theme, idx) {
+  return `<div class="theme-card">
+    <div class="theme-card-header">
+      <input type="text" value="${theme.title||''}" placeholder="Theme Title..." style="flex:1;background:none;border:none;font-family:'Cinzel',serif;font-size:1rem;color:var(--text-primary);outline:none"
+        onchange="updateTheme('${charId}',${idx},'title',this.value)" />
+      <span class="theme-type-badge" style="color:${theme.type==='Mythos'?'#1abc9c':'#e67e22'}">${theme.type||'Mythos'}</span>
+      <button onclick="removeTheme('${charId}',${idx})" style="background:none;border:none;color:var(--red);cursor:pointer;margin-left:0.5rem">✕</button>
+    </div>
+    <div class="form-group" style="margin-bottom:0.5rem">
+      <label>${theme.type==='Mythos'?'Mystery':'Identity'}</label>
+      <input type="text" value="${theme.mystery||''}" placeholder="${theme.type==='Mythos'?'What are you seeking?':'What defines your everyday self?'}"
+        onchange="updateTheme('${charId}',${idx},'mystery',this.value)" />
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem">
+      <div>
+        <label style="font-family:'Share Tech Mono',monospace;font-size:0.6rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.1em;display:block;margin-bottom:0.3rem">Power Tags</label>
+        <div style="display:flex;flex-wrap:wrap;gap:0.3rem" id="ptags-${charId}-${idx}">
+          ${(theme.powerTags||[]).map((pt,pi) => `<span style="background:rgba(26,188,156,0.12);border:1px solid rgba(26,188,156,0.3);border-radius:20px;padding:0.2rem 0.6rem;font-size:0.78rem;display:flex;align-items:center;gap:0.3rem">
+            ${pt}<span style="cursor:pointer;color:var(--text-dim)" onclick="removePowerTag('${charId}',${idx},${pi})">✕</span>
+          </span>`).join('')}
+          <input type="text" placeholder="+ power tag" style="border:1px dashed rgba(26,188,156,0.3);border-radius:20px;padding:0.2rem 0.6rem;font-size:0.78rem;min-width:100px;background:none;color:var(--text-primary);outline:none"
+            onkeydown="if(event.key==='Enter'&&this.value){addPowerTag('${charId}',${idx},this.value);this.value=''}" />
+        </div>
+      </div>
+      <div>
+        <label style="font-family:'Share Tech Mono',monospace;font-size:0.6rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.1em;display:block;margin-bottom:0.3rem">Weakness Tags</label>
+        <div style="display:flex;flex-wrap:wrap;gap:0.3rem" id="wtags-${charId}-${idx}">
+          ${(theme.weaknessTags||[]).map((wt,wi) => `<span style="background:rgba(192,57,43,0.12);border:1px solid rgba(192,57,43,0.3);border-radius:20px;padding:0.2rem 0.6rem;font-size:0.78rem;display:flex;align-items:center;gap:0.3rem">
+            ${wt}<span style="cursor:pointer;color:var(--text-dim)" onclick="removeWeaknessTag('${charId}',${idx},${wi})">✕</span>
+          </span>`).join('')}
+          <input type="text" placeholder="+ weakness tag" style="border:1px dashed rgba(192,57,43,0.3);border-radius:20px;padding:0.2rem 0.6rem;font-size:0.78rem;min-width:100px;background:none;color:var(--text-primary);outline:none"
+            onkeydown="if(event.key==='Enter'&&this.value){addWeaknessTag('${charId}',${idx},this.value);this.value=''}" />
+        </div>
+      </div>
+    </div>
+    <div style="margin-top:0.6rem">
+      <label style="font-family:'Share Tech Mono',monospace;font-size:0.6rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.1em;display:block;margin-bottom:0.3rem">Attention (Fade) Track</label>
+      <div class="checkbox-track">
+        ${[1,2,3].map(n => `<div class="track-box ${(theme.attention||0)>=n?'filled':''}" onclick="toggleThemeAttention('${charId}',${idx},${n})">✓</div>`).join('')}
+      </div>
+    </div>
+  </div>`;
+}
+
+// ---- VAMPIRE DISCIPLINES ----
+function buildDisciplinesPanel(char, g) {
+  const disciplines = ['Animalism','Auspex','Blood Sorcery','Celerity','Dominate','Fortitude','Obfuscate','Oblivion','Potence','Presence','Protean','Thin-Blood Alchemy'];
+  return `<div class="section-card">
+    <div class="section-card-title">Disciplines</div>
+    ${disciplines.map(d => buildDotRow(char, 'disciplines', d, 5)).join('')}
+    <div class="add-trait-row" style="margin-top:0.8rem">
+      <input type="text" id="custom-disc-${char.id}" placeholder="Custom discipline..." />
+      <button class="btn-add" onclick="addCustomDiscipline('${char.id}')">+ Add</button>
+    </div>
+  </div>`;
+}
+
+// ---- WEREWOLF GIFTS ----
+function buildGiftsPanel(char, g) {
+  return buildGenericListPanel(char, 'gifts', 'Gifts', 'Add a Gift (name + level)...');
+}
+
+// ---- MAGE SPHERES ----
+function buildSpheresPanel(char, g) {
+  const spheres = ['Correspondence','Entropy','Forces','Life','Matter','Mind','Prime','Spirit','Time'];
+  return `<div class="section-card">
+    <div class="section-card-title">Spheres</div>
+    ${spheres.map(s => buildDotRow(char, 'spheres', s, 5)).join('')}
+  </div>`;
+}
+
+// ---- CHANGELING CONTRACTS ----
+function buildContractsPanel(char, g) {
+  return buildGenericListPanel(char, 'contracts', 'Contracts', 'Add a Contract...');
+}
+
+// ---- SHADOWRUN AUGMENTS ----
+function buildAugmentsPanel(char, g) {
+  return buildGenericListPanel(char, 'augments', 'Augmentations & Cyberware', 'Add augmentation...');
+}
+
+// ---- ACTIONS (Blades) ----
+function buildActionsPanel(char, g) {
+  const actionGroups = {
+    'Insight': ['Hunt','Study','Survey','Tinker'],
+    'Prowess': ['Finesse','Prowl','Skirmish','Wreck'],
+    'Resolve': ['Attune','Command','Consort','Sway']
+  };
+  return `<div class="section-card">
+    <div class="section-card-title">Actions</div>
+    ${Object.entries(actionGroups).map(([attr, actions]) => `
+      <div style="margin-bottom:1rem">
+        <div style="font-family:'Cinzel',serif;font-size:0.8rem;color:var(--accent);margin-bottom:0.5rem">${attr}</div>
+        ${actions.map(a => buildDotRow(char, 'actions', a, 4)).join('')}
+      </div>`).join('')}
+  </div>`;
+}
+
+// ---- PBTA MOVES ----
+function buildMovesPanel(char, g) {
+  return buildGenericListPanel(char, 'moves', 'Moves', 'Add a Move...');
+}
+
+// ---- GENERIC TALENTS ----
+function buildTalentsPanel(char, g) {
+  return buildGenericListPanel(char, 'talents', 'Talents & Special Abilities', 'Add talent...');
+}
+
+// ---- MERITS ----
+function buildMeritsPanel(char, g) {
+  return buildGenericListPanel(char, 'merits', 'Merits & Flaws', 'Add merit or flaw...');
+}
+
+// ---- EDGES ----
+function buildEdgesPanel(char, g) {
+  return buildGenericListPanel(char, 'edges', 'Edges', 'Add edge...');
+}
+
+// ---- BACKSTORY ----
+function buildBackstoryPanel(char, g) {
+  return `<div class="section-card">
+    <div class="section-card-title">Backstory</div>
+    <div class="form-grid-2 form-grid" style="margin-bottom:1rem">
+      ${['Origin','Motivation','Greatest Fear','Defining Moment','Long-Term Goal'].map(f => `
+        <div class="form-group">
+          <label>${f}</label>
+          <input type="text" value="${(char.backstory||{})[f]||''}" placeholder="${f}..." onchange="updateNestedField('${char.id}','backstory','${f}',this.value)" />
+        </div>`).join('')}
+    </div>
+    <div class="form-group">
+      <label>Full Backstory</label>
+      <textarea style="min-height:200px" onchange="updateCharField('${char.id}','backstoryFull',this.value)">${char.backstoryFull||''}</textarea>
+    </div>
+  </div>`;
+}
+
+// ---- BONDS (Delta Green) ----
+function buildBondsPanel(char, g) {
+  return `<div class="section-card">
+    <div class="section-card-title">Bonds & Relationships</div>
+    <div id="bonds-list-${char.id}">
+      ${(char.bonds||[]).map((b,i) => `
+        <div style="display:flex;gap:0.5rem;margin-bottom:0.5rem">
+          <input type="text" value="${b.name||''}" placeholder="Name" style="flex:1" onchange="updateBond('${char.id}',${i},'name',this.value)" />
+          <input type="text" value="${b.relationship||''}" placeholder="Relationship" style="flex:1" onchange="updateBond('${char.id}',${i},'relationship',this.value)" />
+          <input type="number" value="${b.score||10}" placeholder="Score" style="width:55px;text-align:center" onchange="updateBond('${char.id}',${i},'score',+this.value)" />
+          <button onclick="removeBond('${char.id}',${i})" style="background:none;border:none;color:var(--red);cursor:pointer">✕</button>
+        </div>`).join('')}
+    </div>
+    <button class="btn-add" onclick="addBond('${char.id}')">+ Add Bond</button>
+  </div>`;
+}
+
+// ---- DISORDERS (Delta Green / CoC) ----
+function buildDisordersPanel(char, g) {
+  return `<div class="section-card">
+    <div class="section-card-title">Mental Disorders & Traumas</div>
+    <div id="disorders-list-${char.id}">
+      ${(char.disorders||[]).map((d,i) => `
+        <div style="display:flex;gap:0.5rem;margin-bottom:0.5rem;align-items:center">
+          <input type="text" value="${d.name||''}" placeholder="Disorder name" style="flex:1" onchange="updateDisorder('${char.id}',${i},'name',this.value)" />
+          <input type="text" value="${d.trigger||''}" placeholder="Trigger" style="flex:1" onchange="updateDisorder('${char.id}',${i},'trigger',this.value)" />
+          <button onclick="removeDisorder('${char.id}',${i})" style="background:none;border:none;color:var(--red);cursor:pointer">✕</button>
+        </div>`).join('')}
+    </div>
+    <button class="btn-add" onclick="addDisorder('${char.id}')">+ Add Disorder</button>
+  </div>`;
+}
+
+// ---- GENERIC PANELS ----
+function buildAdvantagesPanel(char, g) { return buildGenericListPanel(char,'advantages','Advantages & Sorcery','Add advantage...'); }
+function buildSorceryPanel(char, g) { return buildGenericListPanel(char,'sorcery','Sorcerous Knacks','Add sorcerous knack...'); }
+function buildCardsPanel(char, g) { return buildGenericListPanel(char,'cards','Domain Cards','Add a Domain Card...'); }
+function buildPowersPanel(char, g) { return buildGenericListPanel(char,'powers','Powers','Add a Power...'); }
+function buildQualitiesPanel(char, g) { return buildGenericListPanel(char,'qualities','Qualities & Challenges','Add quality or challenge...'); }
+function buildStatusPanel(char, g) { return buildGenericListPanel(char,'statuses','Status Tags','Add a status...'); }
+function buildTrainingPanel(char, g) { return buildGenericListPanel(char,'training','Specialized Training','Add training...'); }
+function buildAnomaliesPanel(char, g) { return buildGenericListPanel(char,'anomalies','Anomalies & Special Clearances','Add anomaly info...'); }
+function buildRitesPanel(char, g) { return buildGenericListPanel(char,'rites','Rites','Add a Rite...'); }
+function buildForcePowersPanel(char, g) { return buildGenericListPanel(char,'forcePowers','Force Powers','Add Force Power...'); }
+function buildReputationPanel(char, g) { return buildGenericListPanel(char,'reputation','Reputation & Villains','Add entry...'); }
+function buildConditionsPanel(char, g) { return buildGenericListPanel(char,'conditions','Conditions','Add condition...'); }
+function buildExperiencesPanel(char, g) { return buildGenericListPanel(char,'experiences','Experiences','Add experience...'); }
+function buildBackgroundsPanel(char, g) { return buildGenericListPanel(char,'backgrounds','Backgrounds','Add background...'); }
+function buildAgendaPanel(char, g) { return buildGenericListPanel(char,'agenda','Secret Agenda & Contacts','Add agenda item...'); }
+function buildContactsPanel(char, g) { return buildGenericListPanel(char,'contacts','Contacts & Fixers','Add contact...'); }
+function buildProgramsPanel(char, g) { return buildGenericListPanel(char,'programs','Programs & Apps','Add program...'); }
+function buildCrewPanel(char, g) { return buildGenericListPanel(char,'crew','Crew & Gang','Add crew member...'); }
+function buildPackPanel(char, g) { return buildGenericListPanel(char,'pack','Pack Members','Add pack member...'); }
+function buildTeamPanel(char, g) { return buildGenericListPanel(char,'team','Team Members','Add hero...'); }
+function buildPerksPanel(char, g) { return buildGenericListPanel(char,'perks','Perks','Add perk...'); }
+function buildCellPanel(char, g) { return buildGenericListPanel(char,'cell','Cell Members & Tactics','Add cell info...'); }
+function buildHxPanel(char, g) { return buildGenericListPanel(char,'hx','History (Hx)','Add relationship history...'); }
+function buildAspectsPanel(char, g) { return buildGenericListPanel(char,'aspects','Aspects','Add aspect...'); }
+function buildStuntsPanel(char, g) { return buildGenericListPanel(char,'stunts','Stunts','Add stunt...'); }
+function buildExtrasPanel(char, g) { return buildGenericListPanel(char,'extras','Extras','Add extra...'); }
+function buildLabelsPanel(char, g) {
+  const labels = ['Danger','Freak','Mundane','Savior','Superior'];
+  return `<div class="section-card">
+    <div class="section-card-title">Labels</div>
+    ${labels.map(l => `<div style="display:flex;align-items:center;gap:0.8rem;margin-bottom:0.5rem">
+      <span style="width:80px;font-size:0.9rem">${l}</span>
+      <input type="number" value="${(char.labels||{})[l]||0}" min="-3" max="4" style="width:55px;text-align:center"
+        onchange="updateNestedField('${char.id}','labels','${l}',+this.value)" />
+      <input type="range" min="-3" max="4" value="${(char.labels||{})[l]||0}" style="flex:1"
+        oninput="updateNestedField('${char.id}','labels','${l}',+this.value);this.previousElementSibling.value=this.value" />
+    </div>`).join('')}
+  </div>`;
+}
+
+function buildGenericListPanel(char, key, title, placeholder) {
+  return `<div class="section-card">
+    <div class="section-card-title">${title}</div>
+    <div id="${key}-list-${char.id}">
+      ${(char[key]||[]).map((item,i) => `
+        <div style="display:flex;gap:0.5rem;margin-bottom:0.5rem;align-items:flex-start">
+          <input type="text" value="${typeof item==='string'?item:(item.name||'')}" placeholder="${placeholder}" style="flex:1"
+            onchange="updateListItem('${char.id}','${key}',${i},this.value)" />
+          <button onclick="removeListItem('${char.id}','${key}',${i})" style="background:none;border:none;color:var(--red);cursor:pointer;flex-shrink:0">✕</button>
+        </div>`).join('')}
+    </div>
+    <button class="btn-add" onclick="addListItem('${char.id}','${key}')">+ Add</button>
+  </div>`;
+}
+
+function buildGenericPanel(char, g, tab) {
+  return `<div class="section-card">
+    <div class="section-card-title">${tab}</div>
+    <textarea style="width:100%;min-height:200px" placeholder="${tab} notes..." 
+      onchange="updateCharField('${char.id}','notes_${slugify(tab)}',this.value)">${char['notes_'+slugify(tab)]||''}</textarea>
+  </div>`;
+}
+
+function buildDotRow(char, category, name, maxDots) {
+  const val = (char[category]||{})[name] || 0;
+  return `<div class="vtm-dot-row">
+    <span class="vtm-dot-label" style="font-size:0.88rem">${name}</span>
+    <div class="vtm-dots">
+      ${Array.from({length:maxDots},(_,i) => `<div class="vtm-dot ${val>i?'filled':''}" onclick="setDotValue('${char.id}','${category}','${name}',${i+1},${maxDots})"></div>`).join('')}
+    </div>
+    <span style="font-family:'Share Tech Mono',monospace;font-size:0.7rem;color:var(--text-dim);margin-left:0.5rem">${val}</span>
+  </div>`;
+}
+
+// ============================================================
+// SKILLS DATA
+// ============================================================
+function getSkillsForGame(gid) {
+  const SKILLS = {
+    dnd5e: ['Acrobatics','Animal Handling','Arcana','Athletics','Deception','History','Insight','Intimidation','Investigation','Medicine','Nature','Perception','Performance','Persuasion','Religion','Sleight of Hand','Stealth','Survival'],
+    pf2e: ['Acrobatics','Arcana','Athletics','Crafting','Deception','Diplomacy','Intimidation','Lore','Medicine','Nature','Occultism','Performance','Religion','Society','Stealth','Survival','Thievery'],
+    coc7: ['Accounting','Anthropology','Appraise','Archaeology','Art/Craft','Charm','Climb','Credit Rating','Cthulhu Mythos','Disguise','Dodge','Drive Auto','Elec Repair','Fast Talk','Fighting Brawl','Firearms Handgun','First Aid','History','Intimidate','Jump','Language Other','Law','Library Use','Listen','Locksmith','Mech Repair','Medicine','Natural World','Navigate','Occult','Operate Heavy Machinery','Persuade','Photography','Pilot','Psychology','Psychoanalysis','Ride','Science','Sleight of Hand','Spot Hidden','Stealth','Survival','Swim','Throw','Track'],
+    dg: ['Accounting','Alertness','Anthropology','Archeology','Art','Artillery','Athletics','Bureaucracy','Computer Science','Craft','Criminology','Demolitions','Disguise','Dodge','Drive','Firearms','First Aid','Forensics','Heavy Machinery','History','HUMINT','Law','Medicine','Melee Weapons','Military Science','Navigate','Occult','Persuade','Pharmacy','Pilot','Psychotherapy','Ride','Science','Search','SIGINT','Stealth','Surgery','Survival','Swim','Unarmed Combat'],
+    scp: ['Athletics','Combat','Containment','Deception','Engineering','Hacking','Intimidation','Investigation','Medicine','Negotiation','Occult','Persuasion','Research','Stealth','Survival','Vehicles'],
+    vtm5: ['Athletics','Brawl','Craft','Drive','Firearms','Larceny','Melee','Stealth','Survival','Animal Ken','Etiquette','Insight','Intimidation','Leadership','Performance','Persuasion','Streetwise','Subterfuge','Academics','Awareness','Finance','Investigation','Medicine','Occult','Politics','Science','Technology'],
+    wta5: ['Athletics','Brawl','Craft','Drive','Firearms','Larceny','Melee','Stealth','Survival','Animal Ken','Etiquette','Insight','Intimidation','Leadership','Performance','Persuasion','Streetwise','Subterfuge','Academics','Awareness','Finance','Investigation','Medicine','Occult','Politics','Science','Technology'],
+    sr6: ['Astral','Athletics','Biotech','Close Combat','Con','Cracking','Electronics','Engineering','Exotic Weapons','Firearms','Influence','Outdoors','Piloting','Sorcery','Stealth','Tasking'],
+    cp_red: ['Athletics','Brawling','Concentration','Conversation','Education','Evasion','First Aid','Handgun','Heavy Weapons','Interface','Language','Local Expert','Melee Weapon','Perception','Persuasion','Pilot','Rifle','Shoulder Arms','Stealth','Streetwise','Tracking'],
+    sw_rpg: ['Astrogation','Athletics','Brawl','Charm','Coercion','Computers','Cool','Coordination','Core Worlds','Deception','Discipline','Education','Gunnery','Knowledge','Leadership','Lightsaber','Lore','Mechanics','Medicine','Melee','Outer Rim','Perception','Pilot (Planetary)','Pilot (Space)','Ranged (Heavy)','Ranged (Light)','Resilience','Skullduggery','Stealth','Streetwise','Survival','Underworld','Vigilance','Xenology'],
+    fate_core: ['Athletics','Burglary','Contacts','Crafts','Deceive','Drive','Empathy','Fight','Investigate','Lore','Notice','Physique','Provoke','Rapport','Resources','Shoot','Stealth','Will'],
+    blades: ['Hunt','Study','Survey','Tinker','Finesse','Prowl','Skirmish','Wreck','Attune','Command','Consort','Sway'],
+    masks: ['Directly Engage','Defend','Unleash Powers','Pierce the Mask','Provoke','Assess','Take a Powerful Blow','Comfort & Support','Reject Others Influence'],
+    icons: ['Prowess','Coordination','Strength','Intellect','Awareness','Willpower'],
+    city_of_mist: ['Logos Move: Face Danger','Logos Move: Hit with All You\'ve Got','Mythos Move: Investigate','Mythos Move: Change the Game','Universal: Help Out','Universal: Take a Risk'],
+    daggerheart: ['Agility','Strength','Finesse','Instinct','Presence','Knowledge'],
+    seventh_sea: ['Aim','Athletics','Brawl','Convince','Empathy','Hide','Notice','Perform','Ride','Sailing','Scholarship','Sneak','Theft','Warfare','Weaponry'],
+    alien_rpg: ['Close Combat','Command','Comtech','Heavy Machinery','Medical Aid','Mobility','Observation','Piloting','Ranged Combat','Stamina','Stealth','Survival'],
+    mothership: ['Athletics','Combat','Command','Computers','Engineering','Explosives','First Aid','Piloting','Science','Survival','Tactics','Zero-G'],
+    pbta_generic: ['Act Under Fire','Aggro','Seduce/Manipulate','Read a Person','Read a Sitch','Go Aggro','Help/Hinder'],
+    ose: ['Languages','Open Doors','Search','Hear Noise','Find/Remove Traps','Move Silently','Hide in Shadows','Climb Walls','Pick Pockets'],
+    default: ['Athletics','Combat','Deception','Investigation','Medicine','Perception','Persuasion','Stealth','Survival','Technology']
+  };
+  return SKILLS[gid] || SKILLS.default;
+}
+
+// ============================================================
+// INTERACTIVITY INITIALIZERS
+// ============================================================
+function initSheetInteractivity(char, g) {
+  // Auto-save on any input change within the sheet
+  document.getElementById('screen-character').querySelectorAll('input, textarea, select').forEach(el => {
+    el.addEventListener('change', () => saveState());
+  });
+}
+
+// ============================================================
+// FIELD UPDATE FUNCTIONS
+// ============================================================
+function updateCharField(id, field, value) {
+  if (!characters[id]) return;
+  characters[id][field] = value;
+  saveState();
+}
+
+function updateNestedField(id, category, field, value) {
+  if (!characters[id]) return;
+  if (!characters[id][category]) characters[id][category] = {};
+  characters[id][category][field] = value;
+  saveState();
+}
+
+// Resources
+function setResource(id, name, val) {
+  if (!characters[id]) return;
+  if (!characters[id].resources) characters[id].resources = {};
+  if (!characters[id].resources[name]) characters[id].resources[name] = {current:val,max:val};
+  characters[id].resources[name].current = Math.max(0, Math.min(val, characters[id].resources[name].max));
+  saveState();
+  refreshResourceBar(id, name);
+}
+function setResourceMax(id, name, val) {
+  if (!characters[id]) return;
+  if (!characters[id].resources) characters[id].resources = {};
+  if (!characters[id].resources[name]) characters[id].resources[name] = {current:val,max:val};
+  characters[id].resources[name].max = Math.max(0, val);
+  saveState();
+  refreshResourceBar(id, name);
+}
+function deltaResource(id, name, delta) {
+  if (!characters[id]) return;
+  const res = (characters[id].resources||{})[name];
+  if (!res) return;
+  setResource(id, name, res.current + delta);
+  const inp = document.querySelector(`#screen-character input[value="${res.current}"]`);
+}
+function refreshResourceBar(id, name) {
+  const char = characters[id];
+  const res = char.resources[name];
+  const pct = res.max > 0 ? Math.max(0, Math.min(100, (res.current/res.max)*100)) : 0;
+  // Try to update bar DOM
+  // Re-render the whole core tab is simpler for now
+}
+function adjustResource(id, name, event) {
+  const bar = event.currentTarget;
+  const rect = bar.getBoundingClientRect();
+  const pct = (event.clientX - rect.left) / rect.width;
+  const res = (characters[id].resources||{})[name];
+  if (!res) return;
+  setResource(id, name, Math.round(pct * res.max));
+}
+
+// Traits
+function addTrait(id) {
+  const input = document.getElementById(`trait-input-${id}`);
+  if (!input || !input.value.trim()) return;
+  if (!characters[id].traits) characters[id].traits = [];
+  characters[id].traits.push(input.value.trim());
+  input.value = '';
+  saveState();
+  const listEl = document.getElementById(`trait-list-${id}`);
+  if (listEl) {
+    listEl.innerHTML = characters[id].traits.map((t,i) =>
+      `<span class="trait-pill">${t}<span class="remove-btn" onclick="removeTrait('${id}',${i})">✕</span></span>`).join('');
+  }
+}
+function removeTrait(id, idx) {
+  characters[id].traits.splice(idx, 1);
+  saveState();
+  const listEl = document.getElementById(`trait-list-${id}`);
+  if (listEl) {
+    listEl.innerHTML = characters[id].traits.map((t,i) =>
+      `<span class="trait-pill">${t}<span class="remove-btn" onclick="removeTrait('${id}',${i})">✕</span></span>`).join('');
+  }
+}
+
+// Custom skills
+function addCustomSkill(id) {
+  const inp = document.getElementById(`custom-skill-${id}`);
+  if (!inp || !inp.value.trim()) return;
+  if (!characters[id].skills) characters[id].skills = {};
+  characters[id].skills[inp.value.trim()] = 0;
+  inp.value = '';
+  saveState();
+  loadCharacter(id);
+}
+
+// Equipment
+function addEquipItem(id) {
+  if (!characters[id].equipment) characters[id].equipment = [];
+  characters[id].equipment.push({name:'',qty:1,notes:''});
+  saveState();
+  const listEl = document.getElementById(`equip-list-${id}`);
+  if (listEl) listEl.innerHTML += `<div style="display:flex;gap:0.5rem;margin-bottom:0.5rem;align-items:center">
+    <input type="text" value="" placeholder="Item name" style="flex:2" onchange="updateEquipItem('${id}',${characters[id].equipment.length-1},'name',this.value)" />
+    <input type="text" value="1" placeholder="Qty" style="width:50px;text-align:center" onchange="updateEquipItem('${id}',${characters[id].equipment.length-1},'qty',this.value)" />
+    <input type="text" value="" placeholder="Notes" style="flex:3" onchange="updateEquipItem('${id}',${characters[id].equipment.length-1},'notes',this.value)" />
+    <button onclick="removeEquipItem('${id}',${characters[id].equipment.length-1})" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:1rem;padding:0.2rem">✕</button>
+  </div>`;
+}
+function updateEquipItem(id, idx, field, val) {
+  if (!characters[id].equipment) return;
+  characters[id].equipment[idx][field] = val;
+  saveState();
+}
+function removeEquipItem(id, idx) {
+  characters[id].equipment.splice(idx, 1);
+  saveState();
+  loadCharacter(id);
+}
+
+// Features
+function addFeature(id) {
+  if (!characters[id].features) characters[id].features = [];
+  characters[id].features.push({name:'',source:'',desc:''});
+  saveState();
+  loadCharacter(id);
+}
+function updateFeature(id, idx, field, val) {
+  characters[id].features[idx][field] = val;
+  saveState();
+}
+function removeFeature(id, idx) {
+  characters[id].features.splice(idx, 1);
+  saveState();
+  loadCharacter(id);
+}
+
+// Spells
+function addSpell(id, level, name) {
+  if (!characters[id].spells) characters[id].spells = {};
+  if (!characters[id].spells[level]) characters[id].spells[level] = [];
+  characters[id].spells[level].push(name);
+  saveState();
+}
+function removeSpell(id, level, idx) {
+  characters[id].spells[level].splice(idx, 1);
+  saveState();
+  loadCharacter(id);
+}
+
+// Dot values (VtM, etc)
+function setDotValue(id, cat, name, val, max) {
+  if (!characters[id][cat]) characters[id][cat] = {};
+  const cur = (characters[id][cat][name]||0);
+  characters[id][cat][name] = (cur === val) ? val-1 : val;
+  saveState();
+  loadCharacter(id);
+}
+
+// Generic list items
+function addListItem(id, key) {
+  if (!characters[id][key]) characters[id][key] = [];
+  characters[id][key].push('');
+  saveState();
+  const listEl = document.getElementById(`${key}-list-${id}`);
+  const idx = characters[id][key].length - 1;
+  if (listEl) {
+    const div = document.createElement('div');
+    div.style.cssText = 'display:flex;gap:0.5rem;margin-bottom:0.5rem;align-items:flex-start';
+    div.innerHTML = `<input type="text" value="" placeholder="Add..." style="flex:1" onchange="updateListItem('${id}','${key}',${idx},this.value)" />
+      <button onclick="removeListItem('${id}','${key}',${idx})" style="background:none;border:none;color:var(--red);cursor:pointer;flex-shrink:0">✕</button>`;
+    listEl.appendChild(div);
+    div.querySelector('input').focus();
+  }
+}
+function updateListItem(id, key, idx, val) {
+  characters[id][key][idx] = val;
+  saveState();
+}
+function removeListItem(id, key, idx) {
+  characters[id][key].splice(idx, 1);
+  saveState();
+  loadCharacter(id);
+}
+
+// Bonds, disorders
+function addBond(id) {
+  if (!characters[id].bonds) characters[id].bonds = [];
+  characters[id].bonds.push({name:'',relationship:'',score:10});
+  saveState(); loadCharacter(id);
+}
+function updateBond(id, idx, f, v) { characters[id].bonds[idx][f]=v; saveState(); }
+function removeBond(id, idx) { characters[id].bonds.splice(idx,1); saveState(); loadCharacter(id); }
+
+function addDisorder(id) {
+  if (!characters[id].disorders) characters[id].disorders = [];
+  characters[id].disorders.push({name:'',trigger:''});
+  saveState(); loadCharacter(id);
+}
+function updateDisorder(id, idx, f, v) { characters[id].disorders[idx][f]=v; saveState(); }
+function removeDisorder(id, idx) { characters[id].disorders.splice(idx,1); saveState(); loadCharacter(id); }
+
+// City of Mist themes
+function addTheme(id, type) {
+  if (!characters[id].themes) characters[id].themes = [];
+  characters[id].themes.push({type, title:'', mystery:'', powerTags:[], weaknessTags:[], attention:0});
+  saveState(); loadCharacter(id);
+}
+function updateTheme(id, idx, f, v) { characters[id].themes[idx][f]=v; saveState(); }
+function removeTheme(id, idx) { characters[id].themes.splice(idx,1); saveState(); loadCharacter(id); }
+function addPowerTag(id, themeIdx, val) {
+  if (!characters[id].themes[themeIdx].powerTags) characters[id].themes[themeIdx].powerTags = [];
+  characters[id].themes[themeIdx].powerTags.push(val);
+  saveState(); loadCharacter(id);
+}
+function removePowerTag(id, themeIdx, tagIdx) {
+  characters[id].themes[themeIdx].powerTags.splice(tagIdx,1);
+  saveState(); loadCharacter(id);
+}
+function addWeaknessTag(id, themeIdx, val) {
+  if (!characters[id].themes[themeIdx].weaknessTags) characters[id].themes[themeIdx].weaknessTags = [];
+  characters[id].themes[themeIdx].weaknessTags.push(val);
+  saveState(); loadCharacter(id);
+}
+function removeWeaknessTag(id, themeIdx, tagIdx) {
+  characters[id].themes[themeIdx].weaknessTags.splice(tagIdx,1);
+  saveState(); loadCharacter(id);
+}
+function toggleThemeAttention(id, themeIdx, val) {
+  const cur = characters[id].themes[themeIdx].attention || 0;
+  characters[id].themes[themeIdx].attention = cur === val ? val-1 : val;
+  saveState(); loadCharacter(id);
+}
+
+function addCustomDiscipline(id) {
+  const inp = document.getElementById(`custom-disc-${id}`);
+  if (!inp || !inp.value.trim()) return;
+  if (!characters[id].disciplines) characters[id].disciplines = {};
+  characters[id].disciplines[inp.value.trim()] = 0;
+  inp.value = '';
+  saveState(); loadCharacter(id);
+}
+
+// ============================================================
+// DICE FUNCTIONS
+// ============================================================
+function rollDie(charId, dice) {
+  const sides = parseInt(dice.slice(1));
+  const result = Math.ceil(Math.random() * sides);
+  const mod = parseInt(document.getElementById(`dice-mod-${charId}`)?.value || 0);
+  const total = result + mod;
+  document.getElementById(`dice-result-${charId}`).textContent = total;
+  addDiceHistory(charId, `${dice}${mod>=0?'+'+mod:mod} = ${result}${mod!==0?` (${total})`:''}`, total, sides);
+}
+function rollCustom(charId) {
+  const count = parseInt(document.getElementById(`dice-count-${charId}`)?.value || 1);
+  const sides = parseInt(document.getElementById(`dice-sides-${charId}`)?.value || 6);
+  const mod = parseInt(document.getElementById(`dice-mod-${charId}`)?.value || 0);
+  let rolls = [], total = mod;
+  for (let i = 0; i < count; i++) { const r = Math.ceil(Math.random()*sides); rolls.push(r); total += r; }
+  document.getElementById(`dice-result-${charId}`).textContent = total;
+  addDiceHistory(charId, `${count}d${sides}${mod>=0?'+'+mod:mod} [${rolls.join(',')}] = ${total}`, total, sides);
+}
+function rollFate(charId) {
+  const symbols = ['-','0','+'];
+  const results = [0,1,2,3].map(()=>Math.floor(Math.random()*3));
+  const total = results.reduce((a,r) => a + (r===2?1:r===0?-1:0), 0);
+  const display = results.map(r=>symbols[r]).join(' ');
+  document.getElementById(`fate-result-${charId}`).innerHTML = `${display} = <b>${total>=0?'+'+total:total}</b>`;
+}
+function rollCoM(charId) {
+  const d1 = Math.ceil(Math.random()*6), d2 = Math.ceil(Math.random()*6);
+  const total = d1 + d2;
+  let outcome = total >= 10 ? '✦ <b style="color:var(--green-bright)">HIT</b> (Full success)' :
+                total >= 7 ? '◈ <b style="color:var(--accent)">MIXED HIT</b> (Partial success)' :
+                '✕ <b style="color:var(--red-bright)">MISS</b> (Fail or MC move)';
+  document.getElementById(`com-result-${charId}`).innerHTML = `[${d1}+${d2}] = ${total} — ${outcome}`;
+}
+function rollBlades(charId) {
+  const pool = parseInt(document.getElementById(`blades-pool-${charId}`)?.value || 2);
+  const actual = Math.max(1, pool);
+  const rolls = Array.from({length: actual === pool ? pool : 2}, () => Math.ceil(Math.random()*6));
+  const max = pool < 1 ? Math.min(...rolls) : Math.max(...rolls);
+  const outcome = max === 6 ? '✦ <b style="color:var(--green-bright)">CRITICAL (6)</b>' :
+    max >= 4 ? '◈ <b style="color:var(--accent)">PARTIAL (4-5)</b>' :
+    '✕ <b style="color:var(--red-bright)">FAILURE (1-3)</b>';
+  document.getElementById(`blades-result-${charId}`).innerHTML = `[${rolls.join(',')}] — ${outcome}`;
+}
+function rollPbtA(charId) {
+  const mod = parseInt(document.getElementById(`pbta-mod-${charId}`)?.value || 0);
+  const d1 = Math.ceil(Math.random()*6), d2 = Math.ceil(Math.random()*6);
+  const total = d1 + d2 + mod;
+  const outcome = total >= 10 ? '✦ <b style="color:var(--green-bright)">STRONG HIT (10+)</b>' :
+    total >= 7 ? '◈ <b style="color:var(--accent)">WEAK HIT (7-9)</b>' :
+    '✕ <b style="color:var(--red-bright)">MISS (6-)</b>';
+  document.getElementById(`pbta-result-${charId}`).innerHTML = `[${d1}+${d2}]${mod>=0?'+'+mod:mod} = ${total} — ${outcome}`;
+}
+
+function addDiceHistory(charId, text, result, sides) {
+  const el = document.getElementById(`dice-history-${charId}`);
+  if (!el) return;
+  const isCrit = sides && result >= sides;
+  const isFumble = result === 1 && sides >= 10;
+  const color = isCrit ? 'var(--green-bright)' : isFumble ? 'var(--red-bright)' : 'var(--text-dim)';
+  const entry = document.createElement('div');
+  entry.style.cssText = `color:${color};border-bottom:1px solid var(--border);padding:2px 0`;
+  entry.textContent = `▸ ${text}`;
+  el.insertBefore(entry, el.firstChild);
+  while (el.children.length > 20) el.removeChild(el.lastChild);
+}
+
+// ============================================================
+// CHARACTER MANAGEMENT
+// ============================================================
+function deleteCharacter(id) {
+  if (!confirm(`Delete ${characters[id]?.name || 'this character'}? This cannot be undone.`)) return;
+  delete characters[id];
+  saveState();
+  renderSidebar();
+  showScreen('welcome');
+  notify('Character deleted.');
+}
+
+function duplicateCharacter(id) {
+  const orig = characters[id];
+  if (!orig) return;
+  const newId = 'char_' + Date.now() + '_copy';
+  characters[newId] = JSON.parse(JSON.stringify(orig));
+  characters[newId].id = newId;
+  characters[newId].name = orig.name + ' (Copy)';
+  characters[newId].created = Date.now();
+  saveState();
+  renderSidebar();
+  loadCharacter(newId);
+  notify('Character duplicated!');
+}
+
+function exportCharacter(id) {
+  const char = characters[id];
+  if (!char) return;
+  const json = JSON.stringify(char, null, 2);
+  const blob = new Blob([json], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${char.name.replace(/[^a-z0-9]/gi,'_')}_${char.gameId}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  notify('Character exported!');
+}
+
+function exportAll() {
+  const json = JSON.stringify(characters, null, 2);
+  const blob = new Blob([json], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `character_forge_all_${Date.now()}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  notify('All characters exported!');
+}
+
+function importChars() {
+  const text = document.getElementById('import-text').value.trim();
+  if (!text) return;
+  try {
+    const data = JSON.parse(text);
+    let count = 0;
+    if (data.id && data.gameId) {
+      // Single character
+      characters[data.id] = data;
+      count = 1;
+    } else {
+      // Multiple characters
+      Object.entries(data).forEach(([k,v]) => {
+        if (v.gameId && v.name) { characters[k] = v; count++; }
+      });
+    }
+    saveState();
+    renderSidebar();
+    renderWelcome();
+    closeModal('import-modal');
+    notify(`${count} character(s) imported!`);
+  } catch(e) {
+    notify('Invalid JSON data.');
+  }
+}
+
+function randomizeAvatar(id) {
+  const avatars = ['🧙','🗡','🏹','🔮','🧛','🐺','🦸','👾','🤖','🔱','⚔','🌙','🌫','🐙','☢','⭐','🔥','💀','🐉','🏴‍☠️','🧝','🧟','🦅','🐲','🌊'];
+  const av = avatars[Math.floor(Math.random()*avatars.length)];
+  characters[id].avatar = av;
+  saveState();
+  document.querySelector('.sheet-avatar').textContent = av;
+}
+
+// ============================================================
+// MODAL FUNCTIONS
+// ============================================================
+function openModal(id) {
+  document.getElementById(id).classList.add('open');
+}
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+}
+document.querySelectorAll('.modal-overlay').forEach(m => {
+  m.addEventListener('click', e => { if (e.target === m) m.classList.remove('open'); });
+});
+
+// ============================================================
+// AI PANEL
+// ============================================================
+function toggleAI() {
+  aiPanelOpen = !aiPanelOpen;
+  document.getElementById('ai-panel').classList.toggle('open', aiPanelOpen);
+  document.getElementById('ai-fab').classList.toggle('panel-open', aiPanelOpen);
+  document.getElementById('ai-toggle-btn').classList.toggle('active', aiPanelOpen);
+}
+
+function aiQuick(prompt) {
+  document.getElementById('ai-input').value = prompt;
+  aiSend();
+}
+
+async function aiSend() {
+  const input = document.getElementById('ai-input');
+  const msg = input.value.trim();
+  if (!msg) return;
+  input.value = '';
+  addAiMsg('user', msg);
+  const sendBtn = document.getElementById('ai-send-btn');
+  sendBtn.disabled = true;
+  const loadingEl = addAiMsg('assistant', '<span class="spinner"></span> Consulting the tomes...', true);
+  
+  // Build context
+  let systemContext = `You are the Lore Keeper, an expert AI guide for tabletop RPG character creation across all major systems. You have deep knowledge of: D&D 5e, Pathfinder 2e, Call of Cthulhu, Delta Green, SCP: The RPG, Vampire: The Masquerade 5e, Werewolf: The Apocalypse 5e, Mage: The Ascension, Changeling: The Lost, Hunter: The Reckoning, Shadowrun 6e, Cyberpunk RED, Star Wars FFG, FATE Core, Blades in the Dark, Masks, ICONS, City of Mist, Daggerheart, 7th Sea 2e, ALIEN RPG, Mothership, Powered by the Apocalypse, and Old School Essentials. Be helpful, knowledgeable, and enthusiastic. Keep responses focused and useful. Format with brief markdown if helpful.`;
+  
+  if (activeCharId && characters[activeCharId]) {
+    const char = characters[activeCharId];
+    const g = GAME_SYSTEMS[char.gameId];
+    systemContext += `\n\nCurrently viewing character: ${char.name} — a ${g?.name} character. ${JSON.stringify({data:char.data, stats:char.stats, traits:char.traits})}`;
+  }
+
+  const messages = [
+    ...aiHistory.slice(-8).map(m => ({role:m.role, content:m.content})),
+    {role:'user', content:msg}
+  ];
+
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system: systemContext,
+        messages
+      })
+    });
+    const data = await response.json();
+    const reply = data.content?.map(c=>c.text||'').join('') || 'I encountered an issue. Please try again.';
+    loadingEl.remove();
+    addAiMsg('assistant', reply);
+    aiHistory.push({role:'user',content:msg},{role:'assistant',content:reply});
+  } catch(e) {
+    loadingEl.remove();
+    addAiMsg('assistant', '⚠ Could not reach the Anthropic API. Please check your connection or API key configuration.');
+  }
+  sendBtn.disabled = false;
+}
+
+async function aiAutoFill() {
+  if (!activeCharId) { addAiMsg('system', 'Please select or create a character first.'); return; }
+  const char = characters[activeCharId];
+  const g = GAME_SYSTEMS[char.gameId];
+  const prompt = `Auto-fill a character sheet for "${char.name}" in ${g.name}. Based on the character name and any existing data (${JSON.stringify(char.data)}), suggest appropriate values for: class/archetype, background, key stats, notable traits/skills, and a brief backstory concept. Format as a JSON object with these keys: data (matching these fields: ${g.fields.basic.join(', ')}), traits (array of strings), notes (backstory string). Return ONLY the JSON, no preamble.`;
+  addAiMsg('user', `Auto-filling character sheet for ${char.name}...`);
+  const loadingEl = addAiMsg('assistant', '<span class="spinner"></span> Generating character...', true);
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        messages: [{role:'user',content:prompt}]
+      })
+    });
+    const data = await response.json();
+    const reply = data.content?.map(c=>c.text||'').join('') || '';
+    loadingEl.remove();
+    try {
+      const clean = reply.replace(/```json|```/g,'').trim();
+      const parsed = JSON.parse(clean);
+      if (parsed.data) Object.assign(char.data, parsed.data);
+      if (parsed.traits) char.traits = [...(char.traits||[]), ...parsed.traits];
+      if (parsed.notes) char.notes = (char.notes||'') + '\n\n' + parsed.notes;
+      saveState();
+      loadCharacter(activeCharId);
+      addAiMsg('assistant', `✦ Character auto-filled! I've populated ${char.name}'s sheet with suggested data. Review and adjust as needed.`);
+    } catch(pe) {
+      addAiMsg('assistant', `Here's what I suggest for ${char.name}:\n\n${reply}`);
+    }
+  } catch(e) {
+    loadingEl.remove();
+    addAiMsg('assistant', '⚠ Could not connect to AI. Please try again.');
+  }
+}
+
+function addAiMsg(role, content, isLoading=false) {
+  const msgs = document.getElementById('ai-messages');
+  const div = document.createElement('div');
+  div.className = `ai-msg ${role}${isLoading?' loading':''}`;
+  div.innerHTML = `<div class="ai-msg-label">${role==='user'?'You':role==='system'?'System':'Lore Keeper'}</div>${content}`;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+  return div;
+}
+
+function aiKeydown(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); aiSend(); }
+}
+
+// ============================================================
+// INIT
+// ============================================================
+loadState();
+renderSidebar();
+renderWelcome();
+document.getElementById('nc-game').innerHTML = Object.entries(GAME_SYSTEMS).map(([k,g]) =>
+  `<option value="${k}">${g.icon} ${g.name}</option>`).join('');
+</script>
+</body>
+</html>
